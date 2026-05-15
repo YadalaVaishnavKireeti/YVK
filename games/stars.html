@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<style>
+html,body{
+  margin:0;
+  overflow:hidden;
+  background:#02030a;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="c"></canvas>
+
+<script>
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
+
+let W,H;
+
+function resize(){
+  W=canvas.width=innerWidth;
+  H=canvas.height=innerHeight;
+}
+
+resize();
+
+addEventListener("resize",resize);
+
+const stars=[];
+const lines=[];
+
+for(let i=0;i<18;i++){
+
+  stars.push({
+    x:100+Math.random()*(W-200),
+    y:100+Math.random()*(H-200)
+  });
+}
+
+let last=null;
+
+addEventListener("click",e=>{
+
+  stars.forEach(s=>{
+
+    const d=Math.hypot(
+      e.clientX-s.x,
+      e.clientY-s.y
+    );
+
+    if(d<18){
+
+      if(last){
+
+        lines.push({
+          x1:last.x,
+          y1:last.y,
+          x2:s.x,
+          y2:s.y
+        });
+      }
+
+      last=s;
+    }
+  });
+});
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  ctx.fillStyle='rgba(2,3,10,.3)';
+  ctx.fillRect(0,0,W,H);
+
+  lines.forEach(l=>{
+
+    ctx.beginPath();
+
+    ctx.moveTo(l.x1,l.y1);
+
+    ctx.lineTo(l.x2,l.y2);
+
+    ctx.strokeStyle='rgba(100,223,223,.8)';
+
+    ctx.lineWidth=2;
+
+    ctx.stroke();
+  });
+
+  stars.forEach(s=>{
+
+    ctx.beginPath();
+
+    ctx.arc(s.x,s.y,5,0,Math.PI*2);
+
+    ctx.fillStyle='white';
+
+    ctx.shadowBlur=20;
+    ctx.shadowColor='white';
+
+    ctx.fill();
+
+    ctx.shadowBlur=0;
+  });
+}
+
+animate();
+</script>
+
+</body>
+</html>

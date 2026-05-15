@@ -1,0 +1,111 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,body{
+  width:100%;
+  min-height:100%;
+  overflow-x:hidden;
+  background:#050816;
+  color:white;
+  font-family:Poppins,sans-serif;
+}
+
+body{
+  position:relative;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+}
+
+.hero{
+  min-height:50vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:40px 20px;
+}
+
+.logo{
+  font-size:clamp(48px,10vw,100px);
+  font-weight:700;
+
+  background:linear-gradient(
+    90deg,
+    #80ffdb,
+    #64dfdf,
+    #56cfe1
+  );
+
+  background-clip:text;
+  -webkit-background-clip:text;
+
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+}
+
+.tagline{
+  margin-top:12px;
+  opacity:.75;
+  font-size:clamp(16px,2vw,24px);
+}
+
+.games{
+  width:min(1100px,92%);
+  margin:auto;
+
+  display:grid;
+  grid-template-columns:repeat(
+    auto-fit,
+    minmax(280px,1fr)
+  );
+
+  gap:24px;
+
+  padding-bottom:100px;
+}
+
+.card{
+  background:rgba(255,255,255,.06);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  border-radius:28px;
+
+  padding:32px;
+
+  cursor:pointer;
+
+  transition:.4s;
+
+  backdrop-filter:blur(12px);
+
+  min-height:260px;
+}
+
+.card:hover{
+  transform:translateY(-8px);
+  border-color:rgba(128,255,219,.4);
+}
+
+.emoji{
+  font-size:54px;
+  margin-bottom:20px;
+}
+
+.card h2{
+  margin-bottom:14px;
+  font-size:28px;
+}
+
+.card p{
+  opacity:.7;
+  line-height:1.8;
+}

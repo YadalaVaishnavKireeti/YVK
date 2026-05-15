@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<style>
+html,body{
+  margin:0;
+  overflow:hidden;
+}
+
+body{
+  background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop')
+  center/cover;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="c"></canvas>
+
+<script>
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
+
+let W,H;
+
+function resize(){
+
+  W=canvas.width=innerWidth;
+  H=canvas.height=innerHeight;
+
+  ctx.fillStyle='rgba(230,235,240,.96)';
+  ctx.fillRect(0,0,W,H);
+}
+
+resize();
+
+addEventListener("resize",resize);
+
+function clearFog(x,y){
+
+  ctx.save();
+
+  ctx.globalCompositeOperation='destination-out';
+
+  const g=ctx.createRadialGradient(
+    x,y,0,
+    x,y,90
+  );
+
+  g.addColorStop(0,'rgba(0,0,0,1)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+
+  ctx.fillStyle=g;
+
+  ctx.beginPath();
+
+  ctx.arc(x,y,90,0,Math.PI*2);
+
+  ctx.fill();
+
+  ctx.restore();
+}
+
+addEventListener("mousemove",e=>{
+  clearFog(e.clientX,e.clientY);
+});
+
+addEventListener("touchmove",e=>{
+  clearFog(
+    e.touches[0].clientX,
+    e.touches[0].clientY
+  );
+},{passive:true});
+</script>
+
+</body>
+</html>

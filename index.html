@@ -1,691 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Drift — Relaxation Arcade</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFT</title>
+
+<link rel="stylesheet" href="style.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
-html,body{
-  width:100%;
-  min-height:100%;
-  overflow-x:hidden;
-  font-family:'Poppins',sans-serif;
-  background:#050816;
-  color:white;
-}
-
-body::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(circle at top left, rgba(100,223,223,.15), transparent 35%),
-    radial-gradient(circle at bottom right, rgba(128,255,219,.12), transparent 35%),
-    radial-gradient(circle at center, rgba(86,207,225,.08), transparent 40%);
-  z-index:-2;
-}
-
-canvas{
-  position:fixed;
-  inset:0;
-  z-index:-1;
-}
-
-.container{
-  width:min(1200px,92%);
-  margin:auto;
-}
-
-.hero{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-}
-
-.logo{
-  font-size:clamp(48px,8vw,100px);
-  font-weight:700;
-  letter-spacing:4px;
-  margin-bottom:12px;
-
-  background:linear-gradient(90deg,#80ffdb,#64dfdf,#56cfe1);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-.tagline{
-  font-size:clamp(18px,2vw,24px);
-  opacity:.8;
-  margin-bottom:20px;
-}
-
-.description{
-  max-width:720px;
-  line-height:1.8;
-  opacity:.65;
-  font-size:clamp(14px,1.8vw,18px);
-}
-
-.section-title{
-  text-align:center;
-  font-size:clamp(28px,4vw,48px);
-  margin-bottom:50px;
-  font-weight:600;
-}
-
-.games{
-  padding:40px 0 100px;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:28px;
-}
-
-.card{
-  position:relative;
-  overflow:hidden;
-  border-radius:28px;
-  padding:28px;
-  min-height:340px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(12px);
-  transition:.45s ease;
-  cursor:pointer;
-}
-
-.card:hover{
-  transform:translateY(-8px) scale(1.02);
-  border-color:rgba(128,255,219,.35);
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
-}
-
-.card::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at top right, rgba(128,255,219,.15), transparent 40%);
-  pointer-events:none;
-}
-
-.card-icon{
-  font-size:52px;
-  margin-bottom:18px;
-}
-
-.card-title{
-  font-size:30px;
-  font-weight:600;
-  margin-bottom:12px;
-}
-
-.card-description{
-  opacity:.72;
-  line-height:1.8;
-  margin-bottom:26px;
-}
-
-.card-time{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 16px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-size:14px;
-  opacity:.85;
-}
-
-.card-preview{
-  position:absolute;
-  right:-30px;
-  bottom:-30px;
-  width:170px;
-  height:170px;
-  border-radius:50%;
-  opacity:.18;
-}
-
-.preview1{
-  background:radial-gradient(circle,#80ffdb,transparent 70%);
-  animation:float1 5s ease-in-out infinite;
-}
-
-.preview2{
-  background:radial-gradient(circle,#64dfdf,transparent 70%);
-  animation:float2 7s ease-in-out infinite;
-}
-
-.preview3{
-  background:radial-gradient(circle,#56cfe1,transparent 70%);
-  animation:float1 6s ease-in-out infinite;
-}
-
-@keyframes float1{
-  0%,100%{transform:translateY(0px)}
-  50%{transform:translateY(-16px)}
-}
-
-@keyframes float2{
-  0%,100%{transform:translateX(0px)}
-  50%{transform:translateX(-16px)}
-}
-
-.footer{
-  padding:40px 0 80px;
-  text-align:center;
-  opacity:.55;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.72);
-  backdrop-filter:blur(12px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:100;
-  padding:20px;
-}
-
-.modal-content{
-  width:min(1100px,100%);
-  height:min(90vh,900px);
-  border-radius:24px;
-  overflow:hidden;
-  background:#000;
-  position:relative;
-}
-
-.close-btn{
-  position:absolute;
-  top:16px;
-  right:16px;
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:none;
-  background:rgba(255,255,255,.12);
-  color:white;
-  cursor:pointer;
-  z-index:20;
-  font-size:20px;
-}
-
-iframe{
-  width:100%;
-  height:100%;
-  border:none;
-  background:#000;
-}
-
-@media(max-width:768px){
-
-  .card{
-    min-height:300px;
-  }
-
-  .card-title{
-    font-size:24px;
-  }
-
-}
-</style>
 </head>
+
 <body>
 
 <canvas id="bg"></canvas>
 
-<section class="hero container">
+<section class="hero">
+
   <h1 class="logo">DRIFT</h1>
 
   <p class="tagline">
     Interactive mental refresh experiences
   </p>
 
-  <p class="description">
-    Take a gentle break from noise, pressure, and mental fatigue.
-    Choose a calming interactive experience and recharge slowly.
-  </p>
 </section>
 
-<section class="games container">
+<section class="games">
 
-  <h2 class="section-title">Choose Your Experience</h2>
+  <div class="card" onclick="openGame('games/garden.html')">
 
-  <div class="cards">
+    <div class="emoji">🌱</div>
 
-    <div class="card" onclick="openGame('garden')">
+    <h2>Restore Garden</h2>
 
-      <div class="card-preview preview1"></div>
+    <p>
+      Bring life back to sleeping seeds.
+    </p>
 
-      <div class="card-icon">🌱</div>
+  </div>
 
-      <div class="card-title">
-        Restore Garden
-      </div>
+  <div class="card" onclick="openGame('games/fog.html')">
 
-      <div class="card-description">
-        Awaken sleeping seeds and slowly bring life back to a peaceful glowing garden.
-      </div>
+    <div class="emoji">☁</div>
 
-      <div class="card-time">
-        2–4 minute experience
-      </div>
+    <h2>Clean The Fog</h2>
 
-    </div>
+    <p>
+      Reveal a peaceful hidden world.
+    </p>
 
-    <div class="card" onclick="openGame('fog')">
+  </div>
 
-      <div class="card-preview preview2"></div>
+  <div class="card" onclick="openGame('games/stars.html')">
 
-      <div class="card-icon">☁</div>
+    <div class="emoji">✨</div>
 
-      <div class="card-title">
-        Clean The Fog
-      </div>
+    <h2>Constellation Builder</h2>
 
-      <div class="card-description">
-        Wipe away mist and reveal a beautiful hidden world beneath the haze.
-      </div>
-
-      <div class="card-time">
-        1–3 minute experience
-      </div>
-
-    </div>
-
-    <div class="card" onclick="openGame('stars')">
-
-      <div class="card-preview preview3"></div>
-
-      <div class="card-icon">✨</div>
-
-      <div class="card-title">
-        Constellation Builder
-      </div>
-
-      <div class="card-description">
-        Connect glowing stars slowly and create calming constellations in deep space.
-      </div>
-
-      <div class="card-time">
-        3–5 minute experience
-      </div>
-
-    </div>
+    <p>
+      Connect stars slowly and peacefully.
+    </p>
 
   </div>
 
 </section>
 
-<div class="footer container">
-  Made for peaceful breaks and emotional reset.
-</div>
-
-<div class="modal" id="modal">
-
-  <div class="modal-content">
-
-    <button class="close-btn" onclick="closeGame()">✕</button>
-
-    <iframe id="gameFrame"></iframe>
-
-  </div>
-
-</div>
-
-<script>
-/* =========================
-   AMBIENT BACKGROUND
-========================= */
-
-const canvas=document.getElementById('bg');
-const ctx=canvas.getContext('2d');
-
-let W,H;
-
-function resize(){
-  W=canvas.width=innerWidth;
-  H=canvas.height=innerHeight;
-}
-resize();
-addEventListener('resize',resize);
-
-const particles=[];
-
-for(let i=0;i<90;i++){
-  particles.push({
-    x:Math.random()*W,
-    y:Math.random()*H,
-    r:1+Math.random()*3,
-    vx:(Math.random()-.5)*0.2,
-    vy:(Math.random()-.5)*0.2,
-    a:.1+Math.random()*.5
-  });
-}
-
-function animate(){
-
-  requestAnimationFrame(animate);
-
-  ctx.clearRect(0,0,W,H);
-
-  particles.forEach(p=>{
-
-    p.x+=p.vx;
-    p.y+=p.vy;
-
-    if(p.x<0)p.x=W;
-    if(p.x>W)p.x=0;
-    if(p.y<0)p.y=H;
-    if(p.y>H)p.y=0;
-
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(128,255,219,${p.a})`;
-    ctx.fill();
-  });
-}
-
-animate();
-
-/* =========================
-   GAME MODAL
-========================= */
-
-const modal=document.getElementById('modal');
-const frame=document.getElementById('gameFrame');
-
-function openGame(type){
-
-  modal.style.display='flex';
-
-  if(type==='garden'){
-
-    frame.srcdoc=`
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-html,body{
-margin:0;
-padding:0;
-overflow:hidden;
-background:#071018;
-}
-canvas{
-position:fixed;
-inset:0;
-}
-</style>
-</head>
-<body>
-<canvas id="c"></canvas>
-<script>
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-let W,H;
-function resize(){
-W=canvas.width=innerWidth;
-H=canvas.height=innerHeight;
-}
-resize();
-addEventListener('resize',resize);
-
-const mouse={x:W/2,y:H/2};
-
-addEventListener('mousemove',e=>{
-mouse.x=e.clientX;
-mouse.y=e.clientY;
-});
-
-const seeds=[];
-const flowers=[];
-
-for(let i=0;i<18;i++){
-seeds.push({
-x:80+Math.random()*(W-160),
-y:80+Math.random()*(H-160),
-r:8,
-alive:false,
-pulse:Math.random()*10
-});
-}
-
-function drawFlower(x,y){
-flowers.push({x,y,r:0});
-}
-
-function animate(){
-requestAnimationFrame(animate);
-
-ctx.fillStyle='rgba(7,16,24,.2)';
-ctx.fillRect(0,0,W,H);
-
-flowers.forEach(f=>{
-if(f.r<30)f.r+=0.2;
-for(let i=0;i<6;i++){
-const a=Math.PI*2/6*i;
-ctx.beginPath();
-ctx.arc(f.x+Math.cos(a)*f.r,f.y+Math.sin(a)*f.r,f.r*.35,0,Math.PI*2);
-ctx.fillStyle='#80ffdb';
-ctx.fill();
-}
-});
-
-seeds.forEach(s=>{
-if(s.alive)return;
-
-s.pulse+=0.04;
-
-ctx.beginPath();
-ctx.arc(s.x,s.y,s.r+Math.sin(s.pulse)*2,0,Math.PI*2);
-ctx.fillStyle='#64dfdf';
-ctx.shadowBlur=20;
-ctx.shadowColor='#64dfdf';
-ctx.fill();
-ctx.shadowBlur=0;
-
-const d=Math.hypot(mouse.x-s.x,mouse.y-s.y);
-
-if(d<20){
-s.alive=true;
-drawFlower(s.x,s.y);
-}
-});
-
-ctx.beginPath();
-ctx.arc(mouse.x,mouse.y,8,0,Math.PI*2);
-ctx.fillStyle='white';
-ctx.fill();
-}
-animate();
-</script>
-</body>
-</html>
-`;
-  }
-
-  if(type==='fog'){
-
-    frame.srcdoc=`
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-html,body{
-margin:0;
-overflow:hidden;
-background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop') center/cover;
-}
-canvas{
-position:fixed;
-inset:0;
-}
-</style>
-</head>
-<body>
-<canvas id="c"></canvas>
-<script>
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-let W,H;
-function resize(){
-W=canvas.width=innerWidth;
-H=canvas.height=innerHeight;
-ctx.fillStyle='rgba(220,230,235,.96)';
-ctx.fillRect(0,0,W,H);
-}
-resize();
-addEventListener('resize',resize);
-
-function clearFog(x,y){
-ctx.save();
-ctx.globalCompositeOperation='destination-out';
-const g=ctx.createRadialGradient(x,y,0,x,y,80);
-g.addColorStop(0,'rgba(0,0,0,1)');
-g.addColorStop(1,'rgba(0,0,0,0)');
-ctx.fillStyle=g;
-ctx.beginPath();
-ctx.arc(x,y,80,0,Math.PI*2);
-ctx.fill();
-ctx.restore();
-}
-
-addEventListener('mousemove',e=>{
-clearFog(e.clientX,e.clientY);
-});
-
-addEventListener('touchmove',e=>{
-clearFog(e.touches[0].clientX,e.touches[0].clientY);
-},{passive:true});
-</script>
-</body>
-</html>
-`;
-  }
-
-  if(type==='stars'){
-
-    frame.srcdoc=`
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-html,body{
-margin:0;
-overflow:hidden;
-background:#02030a;
-}
-canvas{
-position:fixed;
-inset:0;
-}
-</style>
-</head>
-<body>
-<canvas id="c"></canvas>
-<script>
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-let W,H;
-function resize(){
-W=canvas.width=innerWidth;
-H=canvas.height=innerHeight;
-}
-resize();
-addEventListener('resize',resize);
-
-const stars=[];
-const lines=[];
-
-for(let i=0;i<16;i++){
-stars.push({
-x:100+Math.random()*(W-200),
-y:100+Math.random()*(H-200)
-});
-}
-
-let last=null;
-
-addEventListener('click',e=>{
-
-stars.forEach(s=>{
-
-const d=Math.hypot(e.clientX-s.x,e.clientY-s.y);
-
-if(d<16){
-
-if(last){
-lines.push({
-x1:last.x,
-y1:last.y,
-x2:s.x,
-y2:s.y
-});
-}
-
-last=s;
-}
-});
-});
-
-function animate(){
-requestAnimationFrame(animate);
-
-ctx.fillStyle='rgba(2,3,10,.3)';
-ctx.fillRect(0,0,W,H);
-
-lines.forEach(l=>{
-ctx.beginPath();
-ctx.moveTo(l.x1,l.y1);
-ctx.lineTo(l.x2,l.y2);
-ctx.strokeStyle='rgba(100,223,223,.7)';
-ctx.lineWidth=2;
-ctx.stroke();
-});
-
-stars.forEach(s=>{
-ctx.beginPath();
-ctx.arc(s.x,s.y,5,0,Math.PI*2);
-ctx.fillStyle='white';
-ctx.shadowBlur=20;
-ctx.shadowColor='white';
-ctx.fill();
-ctx.shadowBlur=0;
-});
-}
-animate();
-</script>
-</body>
-</html>
-`;
-  }
-}
-
-function closeGame(){
-  modal.style.display='none';
-  frame.srcdoc='';
-}
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
