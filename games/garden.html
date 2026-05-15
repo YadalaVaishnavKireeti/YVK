@@ -1,23 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Restore Garden</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Garden</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
 html,body{
+  margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
@@ -26,171 +19,152 @@ html,body{
 }
 
 canvas{
-  position:fixed;
+  position:absolute;
   inset:0;
-}
-
-#ui{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  color:white;
 }
 
 #title{
   position:absolute;
   top:20px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:clamp(22px,3vw,38px);
-  font-weight:600;
-  letter-spacing:2px;
-  opacity:.9;
-}
-
-#message{
-  position:absolute;
-  bottom:30px;
   width:100%;
   text-align:center;
-  font-size:clamp(14px,2vw,20px);
+  color:#fff;
+  font-size:36px;
+  font-weight:700;
+  letter-spacing:2px;
+}
+
+#hint{
+  position:absolute;
+  bottom:24px;
+  width:100%;
+  text-align:center;
+  color:#fff;
   opacity:.8;
 }
 
 #progressWrap{
   position:absolute;
-  top:82px;
+  top:76px;
   left:50%;
   transform:translateX(-50%);
   width:min(320px,70vw);
   height:10px;
+  background:rgba(255,255,255,.15);
   border-radius:999px;
-  background:rgba(255,255,255,.1);
   overflow:hidden;
 }
 
 #progress{
   width:0%;
   height:100%;
-  border-radius:999px;
+  background:#80ffdb;
+}
 
-  background:linear-gradient(
-    90deg,
-    #80ffdb,
-    #64dfdf,
-    #56cfe1
-  );
+#audioPrompt{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
 
-  transition:.35s;
+#audioPrompt .box{
+  background:#fff;
+  padding:28px;
+  text-align:center;
+}
+
+#audioPrompt button{
+  margin:8px;
+  padding:8px 18px;
+  cursor:pointer;
+}
+
+#soundToggle{
+  position:absolute;
+  top:18px;
+  right:18px;
+  color:#fff;
+  font-size:24px;
+  cursor:pointer;
 }
 
 #endScreen{
   position:fixed;
   inset:0;
-
   display:none;
+}
 
+#endCanvas{
+  position:absolute;
+  inset:0;
+}
+
+#endContent{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-
-  background:rgba(0,0,0,.25);
-
-  backdrop-filter:blur(10px);
-
-  z-index:50;
-}
-
-.endCard{
-  width:min(90%,520px);
-
-  background:rgba(255,255,255,.08);
-
-  border:1px solid rgba(255,255,255,.12);
-
-  border-radius:28px;
-
-  padding:42px;
-
-  text-align:center;
-
-  color:white;
-}
-
-.endCard h1{
-  font-size:clamp(38px,6vw,64px);
-  margin-bottom:16px;
-}
-
-.endCard p{
-  opacity:.82;
-  line-height:1.8;
-  margin-bottom:26px;
+  color:#fff;
 }
 
 .buttons{
+  margin-top:24px;
   display:flex;
-  justify-content:center;
   gap:14px;
-  flex-wrap:wrap;
 }
 
 .buttons button{
+  padding:12px 24px;
   border:none;
-
-  padding:12px 22px;
-
-  border-radius:14px;
-
+  border-radius:12px;
   cursor:pointer;
-
-  font-weight:600;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="canvas"></canvas>
-
-<div id="ui">
-
-  <div id="title">
-    RESTORE GARDEN
+<div id="audioPrompt">
+  <div class="box">
+    <p>Enable sound for a better experience?</p>
+    <button id="audioYes">Yes</button>
+    <button id="audioNo">No</button>
   </div>
-
-  <div id="progressWrap">
-    <div id="progress"></div>
-  </div>
-
-  <div id="message">
-    Touch every sleeping seed to awaken the garden
-  </div>
-
 </div>
+
+<div id="soundToggle">🔇</div>
+
+<div id="title">RESTORE GARDEN</div>
+
+<div id="progressWrap">
+  <div id="progress"></div>
+</div>
+
+<div id="hint">
+  Touch every seed
+</div>
+
+<canvas id="canvas"></canvas>
 
 <div id="endScreen">
 
-  <div class="endCard">
+  <canvas id="endCanvas"></canvas>
 
-    <h1>
-      ✨ Garden Restored
-    </h1>
+  <div id="endContent">
 
-    <p>
-      The world is breathing again.<br>
-      Stay calm and enjoy the stillness.
-    </p>
+    <h1>🌱 RESTORED</h1>
+
+    <p>Getting DIGITAL Soon!</p>
 
     <div class="buttons">
-
-      <button onclick="restartGame()">
-        Play Again
-      </button>
-
-      <button onclick="goHome()">
-        Homepage
-      </button>
-
+      <button onclick="restartGame()">Play Again</button>
+      <button onclick="goHome()">Homepage</button>
     </div>
 
   </div>
@@ -198,331 +172,38 @@ canvas{
 </div>
 
 <script>
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+
+const endCanvas=document.getElementById('endCanvas');
+const endCtx=endCanvas.getContext('2d');
+
+const progress=document.getElementById('progress');
 
 let W,H;
 
 function resize(){
-
-  W=canvas.width=innerWidth;
-  H=canvas.height=innerHeight;
+  W=canvas.width=endCanvas.width=innerWidth;
+  H=canvas.height=endCanvas.height=innerHeight;
 }
-
 resize();
 
-addEventListener("resize",resize);
+addEventListener('resize',resize);
 
-const progressBar=document.getElementById("progress");
-const message=document.getElementById("message");
+const mouse={x:0,y:0};
 
-/* =====================
-   HOME
-===================== */
-
-function goHome(){
-
-  window.location.href='../index.html';
-}
-
-/* =====================
-   MOUSE
-===================== */
-
-const mouse={
-  x:W/2,
-  y:H/2,
-  tx:W/2,
-  ty:H/2
-};
-
-addEventListener("mousemove",e=>{
-
-  mouse.tx=e.clientX;
-  mouse.ty=e.clientY;
+addEventListener('mousemove',e=>{
+  mouse.x=e.clientX;
+  mouse.y=e.clientY;
 });
 
-addEventListener("touchmove",e=>{
-
-  mouse.tx=e.touches[0].clientX;
-  mouse.ty=e.touches[0].clientY;
-
-},{passive:true});
-
-/* =====================
-   WORLD LIFE
-===================== */
-
-let worldLife=0;
-
-/* =====================
-   BACKGROUND
-===================== */
-
-function drawBackground(){
-
-  const grd=ctx.createLinearGradient(
-    0,0,0,H
-  );
-
-  grd.addColorStop(
-    0,
-    `rgb(
-      ${10+worldLife},
-      ${18+worldLife*.8},
-      ${35+worldLife}
-    )`
-  );
-
-  grd.addColorStop(
-    1,
-    `rgb(
-      ${5},
-      ${22+worldLife*.7},
-      ${18+worldLife*.5}
-    )`
-  );
-
-  ctx.fillStyle=grd;
-
-  ctx.fillRect(0,0,W,H);
-}
-
-/* =====================
-   STARS
-===================== */
-
-const stars=[];
-
-function createStars(){
-
-  stars.length=0;
-
-  for(let i=0;i<120;i++){
-
-    stars.push({
-
-      x:Math.random()*W,
-      y:Math.random()*H,
-
-      r:Math.random()*2,
-
-      a:Math.random()
-    });
-  }
-}
-
-createStars();
-
-function drawStars(){
-
-  stars.forEach(s=>{
-
-    ctx.beginPath();
-
-    ctx.arc(
-      s.x,
-      s.y,
-      s.r,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fillStyle=
-      `rgba(255,255,255,${s.a*.6})`;
-
-    ctx.fill();
-  });
-}
-
-/* =====================
-   CONFETTI
-===================== */
-
 const COLORS=[
-  '#80ffdb',
-  '#72efdd',
-  '#64dfdf',
-  '#56cfe1',
-  '#5e60ce'
+'#80ffdb',
+'#72efdd',
+'#64dfdf',
+'#56cfe1',
+'#5e60ce'
 ];
-
-let confetti=[];
-
-function spawnConfetti(){
-
-  confetti=[];
-
-  for(let i=0;i<100;i++){
-
-    confetti.push({
-
-      x:Math.random()*W,
-      y:-20,
-
-      vy:2+Math.random()*3,
-
-      size:4+Math.random()*8,
-
-      color:
-      COLORS[
-        Math.floor(
-          Math.random()*COLORS.length
-        )
-      ]
-    });
-  }
-}
-
-function drawConfetti(){
-
-  confetti.forEach(c=>{
-
-    ctx.fillStyle=c.color;
-
-    ctx.fillRect(
-      c.x,
-      c.y,
-      c.size,
-      c.size*1.8
-    );
-
-    c.y+=c.vy;
-  });
-}
-
-/* =====================
-   FLOWERS
-===================== */
-
-const flowers=[];
-
-function spawnFlower(x,y,color){
-
-  flowers.push({
-
-    x,
-    y,
-
-    r:0,
-
-    max:18+Math.random()*18,
-
-    petals:5+Math.floor(Math.random()*3),
-
-    color
-  });
-}
-
-function drawFlowers(){
-
-  flowers.forEach(f=>{
-
-    if(f.r<f.max){
-      f.r+=0.25;
-    }
-
-    for(let i=0;i<f.petals;i++){
-
-      const angle=
-      (Math.PI*2/f.petals)*i;
-
-      const px=
-      f.x+Math.cos(angle)*f.r;
-
-      const py=
-      f.y+Math.sin(angle)*f.r;
-
-      ctx.beginPath();
-
-      ctx.arc(
-        px,
-        py,
-        f.r*.4,
-        0,
-        Math.PI*2
-      );
-
-      ctx.fillStyle=f.color;
-
-      ctx.fill();
-    }
-
-    ctx.beginPath();
-
-    ctx.arc(
-      f.x,
-      f.y,
-      f.r*.3,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fillStyle='#ffffffaa';
-
-    ctx.fill();
-  });
-}
-
-/* =====================
-   PARTICLES
-===================== */
-
-const particles=[];
-
-function spawnParticles(x,y){
-
-  for(let i=0;i<14;i++){
-
-    particles.push({
-
-      x,
-      y,
-
-      vx:(Math.random()-.5)*4,
-      vy:(Math.random()-.5)*4,
-
-      life:1
-    });
-  }
-}
-
-function drawParticles(){
-
-  for(let i=particles.length-1;i>=0;i--){
-
-    const p=particles[i];
-
-    p.x+=p.vx;
-    p.y+=p.vy;
-
-    p.life-=0.02;
-
-    ctx.beginPath();
-
-    ctx.arc(
-      p.x,
-      p.y,
-      3*p.life,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fillStyle=
-      `rgba(255,255,255,${p.life})`;
-
-    ctx.fill();
-
-    if(p.life<=0){
-
-      particles.splice(i,1);
-    }
-  }
-}
-
-/* =====================
-   SEEDS
-===================== */
 
 const TOTAL=20;
 
@@ -539,20 +220,15 @@ function createSeeds(){
     seeds.push({
 
       x:80+Math.random()*(W-160),
-
-      y:100+Math.random()*(H-220),
+      y:100+Math.random()*(H-200),
 
       r:8,
-
-      pulse:Math.random()*10,
 
       active:true,
 
       color:
       COLORS[
-        Math.floor(
-          Math.random()*COLORS.length
-        )
+        Math.floor(Math.random()*COLORS.length)
       ]
     });
   }
@@ -560,81 +236,67 @@ function createSeeds(){
 
 createSeeds();
 
-/* =====================
-   POINTER
-===================== */
+let flowers=[];
 
-function drawPointer(){
+function spawnFlower(x,y,color){
 
-  ctx.beginPath();
-
-  ctx.arc(
-    mouse.x,
-    mouse.y,
-    8,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fillStyle='white';
-
-  ctx.shadowBlur=24;
-  ctx.shadowColor='white';
-
-  ctx.fill();
-
-  ctx.shadowBlur=0;
+  flowers.push({
+    x,y,
+    r:0,
+    color
+  });
 }
 
-/* =====================
-   GAME LOGIC
-===================== */
+function animate(){
 
-function updateSeeds(){
+  requestAnimationFrame(animate);
+
+  ctx.fillStyle='#071018';
+  ctx.fillRect(0,0,W,H);
+
+  flowers.forEach(f=>{
+
+    if(f.r<20) f.r+=0.2;
+
+    for(let i=0;i<6;i++){
+
+      const angle=(Math.PI*2/6)*i;
+
+      const px=f.x+Math.cos(angle)*f.r;
+      const py=f.y+Math.sin(angle)*f.r;
+
+      ctx.beginPath();
+
+      ctx.arc(px,py,f.r*.4,0,Math.PI*2);
+
+      ctx.fillStyle=f.color;
+
+      ctx.fill();
+    }
+  });
 
   seeds.forEach(seed=>{
 
     if(!seed.active) return;
 
-    seed.pulse+=0.05;
-
-    const glow=
-    8+Math.sin(seed.pulse)*4;
-
     ctx.beginPath();
 
-    ctx.arc(
-      seed.x,
-      seed.y,
-      seed.r,
-      0,
-      Math.PI*2
-    );
+    ctx.arc(seed.x,seed.y,seed.r,0,Math.PI*2);
 
     ctx.fillStyle=seed.color;
 
-    ctx.shadowBlur=glow;
-    ctx.shadowColor=seed.color;
-
     ctx.fill();
 
-    ctx.shadowBlur=0;
-
-    const dist=Math.hypot(
+    const d=Math.hypot(
       mouse.x-seed.x,
       mouse.y-seed.y
     );
 
-    if(dist<24){
+    if(d<24){
 
       seed.active=false;
 
       awakened++;
-
-      worldLife+=5;
-
-      progressBar.style.width=
-      (awakened/TOTAL)*100+'%';
 
       spawnFlower(
         seed.x,
@@ -642,94 +304,109 @@ function updateSeeds(){
         seed.color
       );
 
-      spawnParticles(
-        seed.x,
-        seed.y
-      );
-
-      if(awakened===10){
-
-        message.textContent=
-        'The garden is waking up';
-      }
+      progress.style.width=
+      (awakened/TOTAL)*100+'%';
 
       if(awakened===TOTAL){
 
-        message.textContent=
-        'The garden is fully alive ✨';
-
-        spawnConfetti();
-
-        setTimeout(()=>{
-
-          document.getElementById(
-            'endScreen'
-          ).style.display='flex';
-
-        },1600);
+        finalScreen();
       }
     }
   });
 }
 
-/* =====================
-   RESTART
-===================== */
+animate();
+
+/* AUDIO */
+
+let audioCtx,soundOn=false;
+
+function initAudio(){
+  if(!audioCtx){
+    audioCtx=new (window.AudioContext||webkitAudioContext)();
+  }
+}
+
+document.getElementById('audioYes').onclick=()=>{
+  initAudio();
+  audioCtx.resume();
+  soundOn=true;
+  document.getElementById('soundToggle').textContent='🔊';
+  document.getElementById('audioPrompt').style.display='none';
+};
+
+document.getElementById('audioNo').onclick=()=>{
+  document.getElementById('audioPrompt').style.display='none';
+};
+
+document.getElementById('soundToggle').onclick=()=>{
+  soundOn=!soundOn;
+  document.getElementById('soundToggle').textContent=
+  soundOn?'🔊':'🔇';
+};
+
+/* END */
+
+let confetti=[];
+
+function spawnConfetti(){
+
+  confetti=[];
+
+  for(let i=0;i<120;i++){
+
+    confetti.push({
+      x:Math.random()*W,
+      y:-20,
+      vy:2+Math.random()*3,
+      c:COLORS[Math.floor(Math.random()*COLORS.length)]
+    });
+  }
+}
+
+function finalScreen(){
+
+  spawnConfetti();
+
+  document.getElementById('endScreen')
+  .style.display='block';
+
+  function loop(){
+
+    endCtx.clearRect(0,0,W,H);
+
+    confetti.forEach(c=>{
+
+      endCtx.fillStyle=c.c;
+
+      endCtx.fillRect(c.x,c.y,6,12);
+
+      c.y+=c.vy;
+    });
+
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+}
 
 function restartGame(){
 
   awakened=0;
 
-  worldLife=0;
+  flowers=[];
 
-  flowers.length=0;
-
-  particles.length=0;
-
-  confetti=[];
-
-  progressBar.style.width='0%';
-
-  message.textContent=
-  'Touch every sleeping seed to awaken the garden';
+  progress.style.width='0%';
 
   createSeeds();
 
-  document.getElementById(
-    'endScreen'
-  ).style.display='none';
+  document.getElementById('endScreen')
+  .style.display='none';
 }
 
-/* =====================
-   LOOP
-===================== */
-
-function animate(){
-
-  requestAnimationFrame(animate);
-
-  mouse.x +=
-  (mouse.tx-mouse.x)*0.1;
-
-  mouse.y +=
-  (mouse.ty-mouse.y)*0.1;
-
-  drawBackground();
-
-  drawStars();
-
-  drawFlowers();
-
-  updateSeeds();
-
-  drawParticles();
-
-  drawConfetti();
-
-  drawPointer();
+function goHome(){
+  window.location.href='../index.html';
 }
-
-animate();
 </script>
 
 </body>
