@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Restore The Garden</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Drift — Relaxation Arcade</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -14,160 +18,347 @@
 
 html,body{
   width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#0d1117;
-  font-family:Poppins,sans-serif;
+  min-height:100%;
+  overflow-x:hidden;
+  font-family:'Poppins',sans-serif;
+  background:#050816;
+  color:white;
+}
+
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at top left, rgba(100,223,223,.15), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(128,255,219,.12), transparent 35%),
+    radial-gradient(circle at center, rgba(86,207,225,.08), transparent 40%);
+  z-index:-2;
 }
 
 canvas{
   position:fixed;
   inset:0;
+  z-index:-1;
 }
 
-#ui{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  color:white;
+.container{
+  width:min(1200px,92%);
+  margin:auto;
 }
 
-#title{
-  position:absolute;
-  top:20px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:clamp(20px,3vw,34px);
-  font-weight:600;
-  opacity:.9;
-  letter-spacing:2px;
-}
-
-#message{
-  position:absolute;
-  bottom:34px;
-  width:100%;
+.hero{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
   text-align:center;
-  font-size:clamp(14px,2vw,20px);
+}
+
+.logo{
+  font-size:clamp(48px,8vw,100px);
+  font-weight:700;
+  letter-spacing:4px;
+  margin-bottom:12px;
+
+  background:linear-gradient(90deg,#80ffdb,#64dfdf,#56cfe1);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.tagline{
+  font-size:clamp(18px,2vw,24px);
   opacity:.8;
+  margin-bottom:20px;
 }
 
-#progressWrap{
-  position:absolute;
-  top:80px;
-  left:50%;
-  transform:translateX(-50%);
-  width:min(300px,70vw);
-  height:10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.1);
-  overflow:hidden;
+.description{
+  max-width:720px;
+  line-height:1.8;
+  opacity:.65;
+  font-size:clamp(14px,1.8vw,18px);
 }
 
-#progress{
-  width:0%;
-  height:100%;
-  border-radius:999px;
-  background:linear-gradient(90deg,#80ffdb,#64dfdf);
-  transition:.3s;
+.section-title{
+  text-align:center;
+  font-size:clamp(28px,4vw,48px);
+  margin-bottom:50px;
+  font-weight:600;
 }
 
-#soundBtn{
-  position:absolute;
-  top:20px;
-  right:20px;
-  width:46px;
-  height:46px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,.15);
-  background:rgba(255,255,255,.06);
-  backdrop-filter:blur(10px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:auto;
-  cursor:pointer;
-  font-size:18px;
+.games{
+  padding:40px 0 100px;
 }
 
-#overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:20;
-  backdrop-filter:blur(8px);
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:28px;
 }
 
 .card{
-  width:min(90%,420px);
-  padding:32px;
-  border-radius:24px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);
-  text-align:center;
-  color:white;
+  position:relative;
+  overflow:hidden;
+  border-radius:28px;
+  padding:28px;
+  min-height:340px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(12px);
+  transition:.45s ease;
+  cursor:pointer;
 }
 
-.card h1{
+.card:hover{
+  transform:translateY(-8px) scale(1.02);
+  border-color:rgba(128,255,219,.35);
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+
+.card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top right, rgba(128,255,219,.15), transparent 40%);
+  pointer-events:none;
+}
+
+.card-icon{
+  font-size:52px;
+  margin-bottom:18px;
+}
+
+.card-title{
+  font-size:30px;
+  font-weight:600;
   margin-bottom:12px;
 }
 
-.card p{
-  opacity:.8;
-  line-height:1.6;
-  margin-bottom:24px;
+.card-description{
+  opacity:.72;
+  line-height:1.8;
+  margin-bottom:26px;
 }
 
-.card button{
+.card-time{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-size:14px;
+  opacity:.85;
+}
+
+.card-preview{
+  position:absolute;
+  right:-30px;
+  bottom:-30px;
+  width:170px;
+  height:170px;
+  border-radius:50%;
+  opacity:.18;
+}
+
+.preview1{
+  background:radial-gradient(circle,#80ffdb,transparent 70%);
+  animation:float1 5s ease-in-out infinite;
+}
+
+.preview2{
+  background:radial-gradient(circle,#64dfdf,transparent 70%);
+  animation:float2 7s ease-in-out infinite;
+}
+
+.preview3{
+  background:radial-gradient(circle,#56cfe1,transparent 70%);
+  animation:float1 6s ease-in-out infinite;
+}
+
+@keyframes float1{
+  0%,100%{transform:translateY(0px)}
+  50%{transform:translateY(-16px)}
+}
+
+@keyframes float2{
+  0%,100%{transform:translateX(0px)}
+  50%{transform:translateX(-16px)}
+}
+
+.footer{
+  padding:40px 0 80px;
+  text-align:center;
+  opacity:.55;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(12px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+
+.modal-content{
+  width:min(1100px,100%);
+  height:min(90vh,900px);
+  border-radius:24px;
+  overflow:hidden;
+  background:#000;
+  position:relative;
+}
+
+.close-btn{
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
   border:none;
-  padding:12px 22px;
-  border-radius:14px;
-  margin:0 6px;
+  background:rgba(255,255,255,.12);
+  color:white;
   cursor:pointer;
-  font-weight:600;
+  z-index:20;
+  font-size:20px;
+}
+
+iframe{
+  width:100%;
+  height:100%;
+  border:none;
+  background:#000;
+}
+
+@media(max-width:768px){
+
+  .card{
+    min-height:300px;
+  }
+
+  .card-title{
+    font-size:24px;
+  }
+
 }
 </style>
 </head>
-
 <body>
 
-<canvas id="canvas"></canvas>
+<canvas id="bg"></canvas>
 
-<div id="ui">
-  <div id="title">RESTORE THE GARDEN</div>
+<section class="hero container">
+  <h1 class="logo">DRIFT</h1>
 
-  <div id="progressWrap">
-    <div id="progress"></div>
+  <p class="tagline">
+    Interactive mental refresh experiences
+  </p>
+
+  <p class="description">
+    Take a gentle break from noise, pressure, and mental fatigue.
+    Choose a calming interactive experience and recharge slowly.
+  </p>
+</section>
+
+<section class="games container">
+
+  <h2 class="section-title">Choose Your Experience</h2>
+
+  <div class="cards">
+
+    <div class="card" onclick="openGame('garden')">
+
+      <div class="card-preview preview1"></div>
+
+      <div class="card-icon">🌱</div>
+
+      <div class="card-title">
+        Restore Garden
+      </div>
+
+      <div class="card-description">
+        Awaken sleeping seeds and slowly bring life back to a peaceful glowing garden.
+      </div>
+
+      <div class="card-time">
+        2–4 minute experience
+      </div>
+
+    </div>
+
+    <div class="card" onclick="openGame('fog')">
+
+      <div class="card-preview preview2"></div>
+
+      <div class="card-icon">☁</div>
+
+      <div class="card-title">
+        Clean The Fog
+      </div>
+
+      <div class="card-description">
+        Wipe away mist and reveal a beautiful hidden world beneath the haze.
+      </div>
+
+      <div class="card-time">
+        1–3 minute experience
+      </div>
+
+    </div>
+
+    <div class="card" onclick="openGame('stars')">
+
+      <div class="card-preview preview3"></div>
+
+      <div class="card-icon">✨</div>
+
+      <div class="card-title">
+        Constellation Builder
+      </div>
+
+      <div class="card-description">
+        Connect glowing stars slowly and create calming constellations in deep space.
+      </div>
+
+      <div class="card-time">
+        3–5 minute experience
+      </div>
+
+    </div>
+
   </div>
 
-  <div id="message">
-    Touch every sleeping seed to awaken the world
-  </div>
+</section>
 
-  <div id="soundBtn">🔇</div>
+<div class="footer container">
+  Made for peaceful breaks and emotional reset.
 </div>
 
-<div id="overlay">
-  <div class="card">
-    <h1>Energy Garden</h1>
+<div class="modal" id="modal">
 
-    <p>
-      Move slowly.<br>
-      Awaken every sleeping seed.<br>
-      Bring life back to the garden.
-    </p>
+  <div class="modal-content">
 
-    <button id="soundYes">Sound On</button>
-    <button id="soundNo">Continue Silent</button>
+    <button class="close-btn" onclick="closeGame()">✕</button>
+
+    <iframe id="gameFrame"></iframe>
+
   </div>
+
 </div>
 
 <script>
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+/* =========================
+   AMBIENT BACKGROUND
+========================= */
+
+const canvas=document.getElementById('bg');
+const ctx=canvas.getContext('2d');
 
 let W,H;
 
@@ -176,417 +367,324 @@ function resize(){
   H=canvas.height=innerHeight;
 }
 resize();
-addEventListener("resize",resize);
-
-/* =========================
-   UI
-========================= */
-
-const progressBar=document.getElementById("progress");
-const message=document.getElementById("message");
-const overlay=document.getElementById("overlay");
-const soundBtn=document.getElementById("soundBtn");
-
-/* =========================
-   AUDIO
-========================= */
-
-let soundOn=false;
-let audioCtx;
-
-function initAudio(){
-  if(!audioCtx){
-    audioCtx=new(window.AudioContext||webkitAudioContext)();
-  }
-}
-
-function playTone(freq=440,dur=.2,vol=.03){
-
-  if(!soundOn) return;
-
-  const osc=audioCtx.createOscillator();
-  const gain=audioCtx.createGain();
-
-  osc.type="sine";
-  osc.frequency.value=freq;
-
-  gain.gain.value=vol;
-  gain.gain.exponentialRampToValueAtTime(
-    0.0001,
-    audioCtx.currentTime+dur
-  );
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  osc.start();
-  osc.stop(audioCtx.currentTime+dur);
-}
-
-document.getElementById("soundYes").onclick=()=>{
-  soundOn=true;
-  soundBtn.textContent="🔊";
-  initAudio();
-  audioCtx.resume();
-  overlay.style.display="none";
-};
-
-document.getElementById("soundNo").onclick=()=>{
-  overlay.style.display="none";
-};
-
-soundBtn.onclick=()=>{
-
-  soundOn=!soundOn;
-
-  if(soundOn){
-    initAudio();
-    audioCtx.resume();
-    soundBtn.textContent="🔊";
-  }else{
-    soundBtn.textContent="🔇";
-  }
-};
-
-/* =========================
-   MOUSE
-========================= */
-
-const mouse={
-  x:W/2,
-  y:H/2,
-  tx:W/2,
-  ty:H/2
-};
-
-addEventListener("mousemove",e=>{
-  mouse.tx=e.clientX;
-  mouse.ty=e.clientY;
-});
-
-addEventListener("touchmove",e=>{
-  mouse.tx=e.touches[0].clientX;
-  mouse.ty=e.touches[0].clientY;
-},{passive:true});
-
-/* =========================
-   WORLD
-========================= */
-
-let worldLife=0;
-
-/* =========================
-   STARS
-========================= */
-
-const stars=Array.from({length:120},()=>({
-  x:Math.random()*W,
-  y:Math.random()*H,
-  r:Math.random()*2,
-  a:Math.random()
-}));
-
-function drawStars(){
-
-  stars.forEach(s=>{
-
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-
-    ctx.fillStyle=`rgba(255,255,255,${s.a*.6})`;
-    ctx.fill();
-  });
-}
-
-/* =========================
-   BACKGROUND
-========================= */
-
-function drawBackground(){
-
-  const life=Math.min(worldLife,100);
-
-  const grd=ctx.createLinearGradient(0,0,0,H);
-
-  grd.addColorStop(
-    0,
-    `rgb(${10+life},${15+life*.8},${30+life})`
-  );
-
-  grd.addColorStop(
-    1,
-    `rgb(${5},${20+life*.7},${20+life*.5})`
-  );
-
-  ctx.fillStyle=grd;
-  ctx.fillRect(0,0,W,H);
-}
-
-/* =========================
-   FLOWERS
-========================= */
-
-const flowers=[];
-
-function spawnFlower(x,y,color){
-
-  flowers.push({
-    x,y,
-    r:0,
-    max:15+Math.random()*20,
-    color,
-    petals:5+Math.floor(Math.random()*4)
-  });
-}
-
-function drawFlowers(){
-
-  flowers.forEach(f=>{
-
-    if(f.r<f.max){
-      f.r+=0.3;
-    }
-
-    for(let i=0;i<f.petals;i++){
-
-      const angle=(Math.PI*2/f.petals)*i;
-
-      const px=f.x+Math.cos(angle)*f.r;
-      const py=f.y+Math.sin(angle)*f.r;
-
-      ctx.beginPath();
-      ctx.arc(px,py,f.r*.45,0,Math.PI*2);
-
-      ctx.fillStyle=f.color;
-      ctx.fill();
-    }
-
-    ctx.beginPath();
-    ctx.arc(f.x,f.y,f.r*.35,0,Math.PI*2);
-
-    ctx.fillStyle="#fff8";
-    ctx.fill();
-  });
-}
-
-/* =========================
-   SEEDS
-========================= */
-
-const COLORS=[
-  "#80ffdb",
-  "#72efdd",
-  "#64dfdf",
-  "#56cfe1",
-  "#5e60ce"
-];
-
-const TOTAL=20;
-
-let awakened=0;
-
-const seeds=[];
-
-function createSeeds(){
-
-  seeds.length=0;
-
-  for(let i=0;i<TOTAL;i++){
-
-    seeds.push({
-      x:80+Math.random()*(W-160),
-      y:100+Math.random()*(H-200),
-      r:8,
-      pulse:Math.random()*10,
-      active:true,
-      color:COLORS[
-        Math.floor(Math.random()*COLORS.length)
-      ]
-    });
-  }
-}
-
-createSeeds();
-
-/* =========================
-   PARTICLES
-========================= */
+addEventListener('resize',resize);
 
 const particles=[];
 
-function spawnParticles(x,y,color){
-
-  for(let i=0;i<12;i++){
-
-    particles.push({
-      x,y,
-      vx:(Math.random()-.5)*4,
-      vy:(Math.random()-.5)*4,
-      life:1,
-      color
-    });
-  }
-}
-
-function drawParticles(){
-
-  for(let i=particles.length-1;i>=0;i--){
-
-    const p=particles[i];
-
-    p.x+=p.vx;
-    p.y+=p.vy;
-
-    p.life-=0.02;
-
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,3*p.life,0,Math.PI*2);
-
-    ctx.fillStyle=`rgba(255,255,255,${p.life})`;
-    ctx.fill();
-
-    if(p.life<=0){
-      particles.splice(i,1);
-    }
-  }
-}
-
-/* =========================
-   POINTER
-========================= */
-
-function drawPointer(){
-
-  ctx.beginPath();
-  ctx.arc(mouse.x,mouse.y,8,0,Math.PI*2);
-
-  ctx.fillStyle="white";
-  ctx.shadowBlur=20;
-  ctx.shadowColor="#ffffff";
-
-  ctx.fill();
-
-  ctx.shadowBlur=0;
-}
-
-/* =========================
-   GAME
-========================= */
-
-function updateSeeds(){
-
-  seeds.forEach(seed=>{
-
-    if(!seed.active) return;
-
-    seed.pulse+=0.05;
-
-    const glow=8+Math.sin(seed.pulse)*4;
-
-    ctx.beginPath();
-    ctx.arc(seed.x,seed.y,seed.r,0,Math.PI*2);
-
-    ctx.fillStyle=seed.color;
-
-    ctx.shadowBlur=glow;
-    ctx.shadowColor=seed.color;
-
-    ctx.fill();
-
-    ctx.shadowBlur=0;
-
-    const dist=Math.hypot(
-      mouse.x-seed.x,
-      mouse.y-seed.y
-    );
-
-    if(dist<22){
-
-      seed.active=false;
-
-      awakened++;
-
-      worldLife+=5;
-
-      progressBar.style.width=
-        (awakened/TOTAL)*100 + "%";
-
-      spawnFlower(seed.x,seed.y,seed.color);
-
-      spawnParticles(seed.x,seed.y,seed.color);
-
-      playTone(
-        300 + awakened*20,
-        .25,
-        .03
-      );
-
-      if(awakened===Math.floor(TOTAL/2)){
-        message.textContent=
-          "The garden is breathing again";
-      }
-
-      if(awakened===TOTAL){
-
-        message.textContent=
-          "The garden is fully alive ✨";
-
-        celebration();
-      }
-    }
+for(let i=0;i<90;i++){
+  particles.push({
+    x:Math.random()*W,
+    y:Math.random()*H,
+    r:1+Math.random()*3,
+    vx:(Math.random()-.5)*0.2,
+    vy:(Math.random()-.5)*0.2,
+    a:.1+Math.random()*.5
   });
 }
-
-/* =========================
-   CELEBRATION
-========================= */
-
-function celebration(){
-
-  for(let i=0;i<50;i++){
-
-    spawnParticles(
-      Math.random()*W,
-      Math.random()*H,
-      COLORS[Math.floor(Math.random()*COLORS.length)]
-    );
-  }
-
-  if(soundOn){
-
-    [440,520,660,880].forEach((f,i)=>{
-      setTimeout(()=>{
-        playTone(f,.4,.04);
-      },i*140);
-    });
-  }
-}
-
-/* =========================
-   LOOP
-========================= */
 
 function animate(){
 
   requestAnimationFrame(animate);
 
-  mouse.x += (mouse.tx-mouse.x)*0.1;
-  mouse.y += (mouse.ty-mouse.y)*0.1;
+  ctx.clearRect(0,0,W,H);
 
-  drawBackground();
+  particles.forEach(p=>{
 
-  drawStars();
+    p.x+=p.vx;
+    p.y+=p.vy;
 
-  drawFlowers();
+    if(p.x<0)p.x=W;
+    if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;
+    if(p.y>H)p.y=0;
 
-  updateSeeds();
-
-  drawParticles();
-
-  drawPointer();
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(128,255,219,${p.a})`;
+    ctx.fill();
+  });
 }
 
 animate();
+
+/* =========================
+   GAME MODAL
+========================= */
+
+const modal=document.getElementById('modal');
+const frame=document.getElementById('gameFrame');
+
+function openGame(type){
+
+  modal.style.display='flex';
+
+  if(type==='garden'){
+
+    frame.srcdoc=`
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html,body{
+margin:0;
+padding:0;
+overflow:hidden;
+background:#071018;
+}
+canvas{
+position:fixed;
+inset:0;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){
+W=canvas.width=innerWidth;
+H=canvas.height=innerHeight;
+}
+resize();
+addEventListener('resize',resize);
+
+const mouse={x:W/2,y:H/2};
+
+addEventListener('mousemove',e=>{
+mouse.x=e.clientX;
+mouse.y=e.clientY;
+});
+
+const seeds=[];
+const flowers=[];
+
+for(let i=0;i<18;i++){
+seeds.push({
+x:80+Math.random()*(W-160),
+y:80+Math.random()*(H-160),
+r:8,
+alive:false,
+pulse:Math.random()*10
+});
+}
+
+function drawFlower(x,y){
+flowers.push({x,y,r:0});
+}
+
+function animate(){
+requestAnimationFrame(animate);
+
+ctx.fillStyle='rgba(7,16,24,.2)';
+ctx.fillRect(0,0,W,H);
+
+flowers.forEach(f=>{
+if(f.r<30)f.r+=0.2;
+for(let i=0;i<6;i++){
+const a=Math.PI*2/6*i;
+ctx.beginPath();
+ctx.arc(f.x+Math.cos(a)*f.r,f.y+Math.sin(a)*f.r,f.r*.35,0,Math.PI*2);
+ctx.fillStyle='#80ffdb';
+ctx.fill();
+}
+});
+
+seeds.forEach(s=>{
+if(s.alive)return;
+
+s.pulse+=0.04;
+
+ctx.beginPath();
+ctx.arc(s.x,s.y,s.r+Math.sin(s.pulse)*2,0,Math.PI*2);
+ctx.fillStyle='#64dfdf';
+ctx.shadowBlur=20;
+ctx.shadowColor='#64dfdf';
+ctx.fill();
+ctx.shadowBlur=0;
+
+const d=Math.hypot(mouse.x-s.x,mouse.y-s.y);
+
+if(d<20){
+s.alive=true;
+drawFlower(s.x,s.y);
+}
+});
+
+ctx.beginPath();
+ctx.arc(mouse.x,mouse.y,8,0,Math.PI*2);
+ctx.fillStyle='white';
+ctx.fill();
+}
+animate();
+</script>
+</body>
+</html>
+`;
+  }
+
+  if(type==='fog'){
+
+    frame.srcdoc=`
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html,body{
+margin:0;
+overflow:hidden;
+background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop') center/cover;
+}
+canvas{
+position:fixed;
+inset:0;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){
+W=canvas.width=innerWidth;
+H=canvas.height=innerHeight;
+ctx.fillStyle='rgba(220,230,235,.96)';
+ctx.fillRect(0,0,W,H);
+}
+resize();
+addEventListener('resize',resize);
+
+function clearFog(x,y){
+ctx.save();
+ctx.globalCompositeOperation='destination-out';
+const g=ctx.createRadialGradient(x,y,0,x,y,80);
+g.addColorStop(0,'rgba(0,0,0,1)');
+g.addColorStop(1,'rgba(0,0,0,0)');
+ctx.fillStyle=g;
+ctx.beginPath();
+ctx.arc(x,y,80,0,Math.PI*2);
+ctx.fill();
+ctx.restore();
+}
+
+addEventListener('mousemove',e=>{
+clearFog(e.clientX,e.clientY);
+});
+
+addEventListener('touchmove',e=>{
+clearFog(e.touches[0].clientX,e.touches[0].clientY);
+},{passive:true});
+</script>
+</body>
+</html>
+`;
+  }
+
+  if(type==='stars'){
+
+    frame.srcdoc=`
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html,body{
+margin:0;
+overflow:hidden;
+background:#02030a;
+}
+canvas{
+position:fixed;
+inset:0;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){
+W=canvas.width=innerWidth;
+H=canvas.height=innerHeight;
+}
+resize();
+addEventListener('resize',resize);
+
+const stars=[];
+const lines=[];
+
+for(let i=0;i<16;i++){
+stars.push({
+x:100+Math.random()*(W-200),
+y:100+Math.random()*(H-200)
+});
+}
+
+let last=null;
+
+addEventListener('click',e=>{
+
+stars.forEach(s=>{
+
+const d=Math.hypot(e.clientX-s.x,e.clientY-s.y);
+
+if(d<16){
+
+if(last){
+lines.push({
+x1:last.x,
+y1:last.y,
+x2:s.x,
+y2:s.y
+});
+}
+
+last=s;
+}
+});
+});
+
+function animate(){
+requestAnimationFrame(animate);
+
+ctx.fillStyle='rgba(2,3,10,.3)';
+ctx.fillRect(0,0,W,H);
+
+lines.forEach(l=>{
+ctx.beginPath();
+ctx.moveTo(l.x1,l.y1);
+ctx.lineTo(l.x2,l.y2);
+ctx.strokeStyle='rgba(100,223,223,.7)';
+ctx.lineWidth=2;
+ctx.stroke();
+});
+
+stars.forEach(s=>{
+ctx.beginPath();
+ctx.arc(s.x,s.y,5,0,Math.PI*2);
+ctx.fillStyle='white';
+ctx.shadowBlur=20;
+ctx.shadowColor='white';
+ctx.fill();
+ctx.shadowBlur=0;
+});
+}
+animate();
+</script>
+</body>
+</html>
+`;
+  }
+}
+
+function closeGame(){
+  modal.style.display='none';
+  frame.srcdoc='';
+}
 </script>
 
 </body>
