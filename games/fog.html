@@ -1,23 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Clean The Fog</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-html,body{
+*{
   margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,body{
+  width:100%;
+  height:100%;
   overflow:hidden;
+  font-family:Poppins,sans-serif;
 }
 
 body{
-  background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop')
-  center/cover;
+  position:fixed;
+  inset:0;
+
+  background:
+  url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1400&auto=format&fit=crop')
+  center center / cover no-repeat;
 }
 
 canvas{
   position:fixed;
   inset:0;
+}
+
+#title{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  font-size:clamp(24px,4vw,42px);
+  font-weight:600;
+  letter-spacing:2px;
+  text-shadow:0 4px 20px rgba(0,0,0,.5);
+}
+
+#hint{
+  position:fixed;
+  bottom:30px;
+  width:100%;
+  text-align:center;
+  color:white;
+  opacity:.85;
+  font-size:clamp(14px,2vw,20px);
+  text-shadow:0 4px 20px rgba(0,0,0,.5);
+}
+
+#progressWrap{
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(320px,70vw);
+  height:10px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.2);
+}
+
+#progress{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+
+  background:linear-gradient(
+    90deg,
+    #80ffdb,
+    #64dfdf,
+    #56cfe1
+  );
+
+  transition:.2s;
+}
+
+#end{
+  position:fixed;
+  inset:0;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+
+  background:rgba(0,0,0,.35);
+
+  backdrop-filter:blur(10px);
+
+  color:white;
+
+  z-index:20;
+}
+
+#end h1{
+  font-size:clamp(40px,6vw,72px);
+  margin-bottom:16px;
+}
+
+#end p{
+  opacity:.85;
+  font-size:clamp(16px,2vw,22px);
 }
 </style>
 </head>
@@ -26,9 +123,28 @@ canvas{
 
 <canvas id="c"></canvas>
 
+<div id="title">
+  CLEAN THE FOG
+</div>
+
+<div id="progressWrap">
+  <div id="progress"></div>
+</div>
+
+<div id="hint">
+  Wipe away the fog to reveal peace
+</div>
+
+<div id="end">
+  <h1>☀ Peace Revealed</h1>
+  <p>The world feels calm again.</p>
+</div>
+
 <script>
 const canvas=document.getElementById("c");
 const ctx=canvas.getContext("2d");
+
+const progress=document.getElementById("progress");
 
 let W,H;
 
@@ -37,15 +153,62 @@ function resize(){
   W=canvas.width=innerWidth;
   H=canvas.height=innerHeight;
 
-  ctx.fillStyle='rgba(230,235,240,.96)';
-  ctx.fillRect(0,0,W,H);
+  drawFog();
 }
 
 resize();
 
 addEventListener("resize",resize);
 
+/* =====================
+   FOG
+===================== */
+
+function drawFog(){
+
+  ctx.fillStyle='rgba(220,230,235,.96)';
+  ctx.fillRect(0,0,W,H);
+}
+
+drawFog();
+
+/* =====================
+   PROGRESS
+===================== */
+
+let cleared=0;
+let finished=false;
+
+function updateProgress(){
+
+  const percent=Math.min(
+    100,
+    (cleared/140)*100
+  );
+
+  progress.style.width=percent+'%';
+
+  if(percent>=100 && !finished){
+
+    finished=true;
+
+    setTimeout(()=>{
+      showEnding();
+    },700);
+  }
+}
+
+/* =====================
+   CLEAR
+===================== */
+
 function clearFog(x,y){
+
+  if(finished) return;
+
+  cleared++;
+
+  updateProgress();
 
   ctx.save();
 
@@ -63,23 +226,48 @@ function clearFog(x,y){
 
   ctx.beginPath();
 
-  ctx.arc(x,y,90,0,Math.PI*2);
+  ctx.arc(
+    x,
+    y,
+    90,
+    0,
+    Math.PI*2
+  );
 
   ctx.fill();
 
   ctx.restore();
 }
 
+/* =====================
+   EVENTS
+===================== */
+
 addEventListener("mousemove",e=>{
-  clearFog(e.clientX,e.clientY);
+  clearFog(
+    e.clientX,
+    e.clientY
+  );
 });
 
 addEventListener("touchmove",e=>{
+
   clearFog(
     e.touches[0].clientX,
     e.touches[0].clientY
   );
+
 },{passive:true});
+
+/* =====================
+   ENDING
+===================== */
+
+function showEnding(){
+
+  document.getElementById("end")
+    .style.display='flex';
+}
 </script>
 
 </body>
