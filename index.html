@@ -1,379 +1,501 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>YVK is Coming</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Energy Garden</title>
 
 <style>
-html,body{
+*{
   margin:0;
   padding:0;
+  box-sizing:border-box;
+}
+
+html,body{
   width:100%;
   height:100%;
   overflow:hidden;
+  background:#050816;
   font-family:Poppins,sans-serif;
-  background:#fff;
 }
-canvas{position:absolute;inset:0}
 
-#toast{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-weight:600;
-  font-size:clamp(16px,4vw,32px);
-  display:none;
+canvas{
+  position:fixed;
+  inset:0;
+}
+
+#ui{
+  position:fixed;
+  inset:0;
   pointer-events:none;
 }
 
-#soundToggle{
+#title{
   position:absolute;
-  top:16px;
-  right:16px;
-  font-size:22px;
-  cursor:pointer;
-  z-index:10;
+  top:24px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  font-size:clamp(18px,3vw,28px);
+  font-weight:600;
+  opacity:.85;
+  letter-spacing:1px;
 }
 
-#audioPrompt{
+#message{
+  position:absolute;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  font-size:clamp(14px,2vw,20px);
+  opacity:.7;
+  transition:.4s;
+}
+
+#soundBtn{
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(10px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  color:white;
+  pointer-events:auto;
+  cursor:pointer;
+}
+
+#overlay{
   position:fixed;
   inset:0;
-  background:rgba(255,255,255,.9);
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(10px);
   display:flex;
   align-items:center;
   justify-content:center;
   z-index:20;
 }
-#audioPrompt .box{
-  border:2px solid #000;
-  padding:24px 28px;
+
+#overlay .card{
+  width:min(90%,400px);
+  padding:30px;
+  border-radius:24px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
   text-align:center;
-}
-#audioPrompt button{
-  margin:0 8px;
-  padding:6px 16px;
-  font-weight:600;
-  border:2px solid #000;
-  background:#fff;
-  cursor:pointer;
+  color:white;
 }
 
-#restartBtn{
-  position:absolute;
-  top:70%;
-  left:50%;
-  transform:translateX(-50%);
-  padding:10px 20px;
-  font-weight:600;
-  font-size:clamp(14px,3vw,20px);
-  border:2px solid #000;
-  background:#fff;
+#overlay h2{
+  margin-bottom:10px;
+  font-size:28px;
+}
+
+#overlay p{
+  opacity:.8;
+  margin-bottom:24px;
+  line-height:1.5;
+}
+
+#overlay button{
+  padding:12px 22px;
+  border:none;
+  border-radius:14px;
+  margin:0 8px;
   cursor:pointer;
-  display:none;
-  z-index:30;
+  font-weight:600;
+  background:white;
 }
 </style>
 </head>
 
 <body>
 
-<div id="audioPrompt">
-  <div class="box">
-    <p>Enable sound for a better experience?</p>
-    <button id="audioYes">Yes</button>
-    <button id="audioNo">No</button>
+<canvas id="canvas"></canvas>
+
+<div id="ui">
+  <div id="title">ENERGY GARDEN</div>
+  <div id="message">Move gently and restore the world</div>
+
+  <div id="soundBtn">🔇</div>
+</div>
+
+<div id="overlay">
+  <div class="card">
+    <h2>Welcome</h2>
+    <p>
+      Relax your mind.<br>
+      Move slowly and awaken the energy around you.
+    </p>
+
+    <button id="soundYes">Sound On</button>
+    <button id="soundNo">Continue Silent</button>
   </div>
 </div>
 
-<div id="soundToggle">🔇</div>
-<canvas id="canvas"></canvas>
-<div id="toast"></div>
-<button id="restartBtn">Play Again</button>
-
 <script>
-/* ================= CANVAS SETUP ================= */
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
-const toast=document.getElementById("toast");
-const restartBtn=document.getElementById("restartBtn");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-let W,H,BORDER,AREA;
+let W,H;
 
 function resize(){
-  W=canvas.width=innerWidth;
-  H=canvas.height=innerHeight;
-  BORDER=Math.max(30,Math.min(60,W*0.06));
-  AREA={x:BORDER,y:BORDER,w:W-BORDER*2,h:H-BORDER*2};
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
 }
 resize();
 addEventListener("resize",resize);
 
-let mouse={x:W/2,y:H/2};
+/* =========================
+   MOUSE
+========================= */
 
-/* ================= MOUSE & TOUCH ================= */
-canvas.addEventListener("mousemove", e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
+const mouse = {
+  x: W/2,
+  y: H/2,
+  tx: W/2,
+  ty: H/2
+};
+
+addEventListener("mousemove",e=>{
+  mouse.tx = e.clientX;
+  mouse.ty = e.clientY;
 });
 
-canvas.addEventListener("touchstart", e => {
-  mouse.x = e.touches[0].clientX;
-  mouse.y = e.touches[0].clientY;
-}, {passive:true});
+addEventListener("touchmove",e=>{
+  mouse.tx = e.touches[0].clientX;
+  mouse.ty = e.touches[0].clientY;
+},{passive:true});
 
-canvas.addEventListener("touchmove", e => {
-  mouse.x = e.touches[0].clientX;
-  mouse.y = e.touches[0].clientY;
-}, {passive:true});
+/* =========================
+   AUDIO
+========================= */
 
-/* ================= AUDIO ================= */
-let audioCtx,soundOn=false;
+let audioCtx;
+let soundOn=false;
+
 function initAudio(){
-  if(!audioCtx) audioCtx=new (window.AudioContext||webkitAudioContext)();
+  if(!audioCtx){
+    audioCtx = new(window.AudioContext||webkitAudioContext)();
+  }
 }
-function tone(freq,dur=0.15,vol=0.2){
+
+function playTone(freq=440,dur=.2,vol=.03){
   if(!soundOn) return;
-  const o=audioCtx.createOscillator();
-  const g=audioCtx.createGain();
-  o.frequency.value=freq;
-  g.gain.value=vol;
-  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
-  o.connect(g).connect(audioCtx.destination);
-  o.start();
-  o.stop(audioCtx.currentTime+dur);
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type="sine";
+  osc.frequency.value=freq;
+
+  gain.gain.value=vol;
+  gain.gain.exponentialRampToValueAtTime(
+    0.0001,
+    audioCtx.currentTime + dur
+  );
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
 }
-const collectSound=()=>tone(520,0.12,0.15);
-const milestoneSound=()=>tone(880,0.25,0.25);
-function celebrationSound(){
-  [523,659,784,1046].forEach((f,i)=>{
-    setTimeout(()=>tone(f,0.3,0.18),i*120);
+
+/* =========================
+   UI
+========================= */
+
+const overlay=document.getElementById("overlay");
+const soundBtn=document.getElementById("soundBtn");
+const message=document.getElementById("message");
+
+document.getElementById("soundYes").onclick=()=>{
+  soundOn=true;
+  soundBtn.textContent="🔊";
+  initAudio();
+  audioCtx.resume();
+  overlay.style.display="none";
+};
+
+document.getElementById("soundNo").onclick=()=>{
+  soundOn=false;
+  overlay.style.display="none";
+};
+
+soundBtn.onclick=()=>{
+  soundOn=!soundOn;
+
+  if(soundOn){
+    initAudio();
+    audioCtx.resume();
+    soundBtn.textContent="🔊";
+  }else{
+    soundBtn.textContent="🔇";
+  }
+};
+
+/* =========================
+   BACKGROUND GLOW
+========================= */
+
+let worldEnergy=0;
+
+function drawBackground(){
+
+  const grd = ctx.createRadialGradient(
+    W/2,H/2,
+    100,
+    W/2,H/2,
+    W
+  );
+
+  grd.addColorStop(0,`rgba(${20+worldEnergy*0.3},${40+worldEnergy*0.5},120,.25)`);
+  grd.addColorStop(1,"#050816");
+
+  ctx.fillStyle=grd;
+  ctx.fillRect(0,0,W,H);
+
+}
+
+/* =========================
+   STARS
+========================= */
+
+const stars = Array.from({length:120},()=>({
+  x:Math.random()*W,
+  y:Math.random()*H,
+  r:Math.random()*2,
+  a:Math.random()
+}));
+
+function drawStars(){
+  stars.forEach(s=>{
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${s.a})`;
+    ctx.fill();
   });
 }
 
-/* ================= AUDIO PROMPT ================= */
-let gameStarted=false;
-const prompt=document.getElementById("audioPrompt");
-const soundToggle=document.getElementById("soundToggle");
+/* =========================
+   PARTICLES
+========================= */
 
-document.getElementById("audioYes").onclick=()=>{
-  initAudio();audioCtx.resume();
-  soundOn=true;
-  soundToggle.textContent="🔊";
-  prompt.style.display="none";
-  startGame();
-};
-document.getElementById("audioNo").onclick=()=>{
-  soundOn=false;
-  soundToggle.textContent="🔇";
-  prompt.style.display="none";
-  startGame();
-};
-soundToggle.onclick=()=>{
-  soundOn=!soundOn;
-  soundToggle.textContent=soundOn?"🔊":"🔇";
-  if(soundOn){initAudio();audioCtx.resume();}
-};
+const COLORS = [
+  "#80ffdb",
+  "#72efdd",
+  "#64dfdf",
+  "#56cfe1",
+  "#5e60ce"
+];
 
-/* ================= GAME DATA ================= */
-const COLORS=["#ff595e","#1982c4","#6a4c93","#8ac926","#ffca3a"];
-const TOTAL=12;
+const particles=[];
 
-let particles=[];
-let eatenCount=0,halfShown=false,finished=false;
-let sparks=[];
-let celebrationFrame=null;
-
-/* ================= SPARK EFFECT ================= */
-function spawnSpark(x,y,color){
-  for(let i=0;i<5;i++){
-    sparks.push({
-      x, y,
-      vx:(Math.random()-0.5)*3,
-      vy:(Math.random()-0.5)*3,
-      life:20+Math.random()*10,
-      color
-    });
-  }
+for(let i=0;i<70;i++){
+  particles.push({
+    x:Math.random()*W,
+    y:Math.random()*H,
+    vx:(Math.random()-.5)*0.5,
+    vy:(Math.random()-.5)*0.5,
+    size:2+Math.random()*4,
+    color:COLORS[Math.floor(Math.random()*COLORS.length)],
+    life:0
+  });
 }
-function drawSparks(){
-  for(let i=sparks.length-1;i>=0;i--){
-    const s=sparks[i];
-    ctx.fillStyle=s.color;
-    ctx.fillRect(s.x,s.y,2,2);
-    s.x+=s.vx;
-    s.y+=s.vy;
-    s.life--;
-    if(s.life<=0)sparks.splice(i,1);
+
+/* =========================
+   TRAILS
+========================= */
+
+const trails=[];
+
+function addTrail(){
+  trails.push({
+    x:mouse.x,
+    y:mouse.y,
+    life:1
+  });
+
+  if(trails.length>50){
+    trails.shift();
   }
 }
 
-/* ================= UI ================= */
-function showToast(t){
-  toast.textContent=t;
-  toast.style.display="block";
-  milestoneSound();
-  setTimeout(()=>toast.style.display="none",1300);
-}
-function drawBorder(){
-  ctx.strokeStyle="#000";
-  ctx.lineWidth=2;
-  ctx.strokeRect(AREA.x,AREA.y,AREA.w,AREA.h);
-}
-function drawPointer(){
-  ctx.beginPath();
-  ctx.arc(mouse.x,mouse.y,6,0,Math.PI*2);
-  ctx.fillStyle="#000";
-  ctx.fill();
-}
+function drawTrails(){
 
-/* ================= FINAL SCREEN ================= */
-let confetti=[];
-function spawnConfetti(){
-  for(let i=0;i<90;i++){
-    confetti.push({
-      x:Math.random()*W,
-      y:-20,
-      vy:2+Math.random()*3,
-      c:COLORS[Math.floor(Math.random()*COLORS.length)]
-    });
+  for(let i=0;i<trails.length;i++){
+
+    const t=trails[i];
+
+    ctx.beginPath();
+    ctx.arc(t.x,t.y,20*t.life,0,Math.PI*2);
+
+    ctx.fillStyle=`rgba(120,255,220,${t.life*.08})`;
+    ctx.fill();
+
+    t.life-=0.02;
+  }
+
+  while(trails.length && trails[0].life<=0){
+    trails.shift();
   }
 }
 
-function finalScreen(){
-  celebrationSound();
-  spawnConfetti();
-  restartBtn.style.display="block";
+/* =========================
+   PARTICLE LOGIC
+========================= */
 
-  const titleFont=Math.min(56,W*0.08);
-  const baseFont=Math.min(18,W*0.035);
-
-  const gears=[
-    {x:W/2-120,y:H/2-90,a:0,d:0.03},
-    {x:W/2-40,y:H/2-90,a:0,d:-0.03},
-    {x:W/2+40,y:H/2-90,a:0,d:0.03},
-    {x:W/2+120,y:H/2-90,a:0,d:-0.03}
-  ];
-
-  function drawGear(g){
-    ctx.save();
-    ctx.translate(g.x,g.y);
-    ctx.rotate(g.a);
-    ctx.strokeStyle="#000";
-    for(let i=0;i<8;i++){
-      ctx.beginPath();
-      ctx.moveTo(0,0);
-      ctx.lineTo(0,22);
-      ctx.stroke();
-      ctx.rotate(Math.PI/4);
-    }
-    ctx.restore();
-    g.a+=g.d;
-  }
-
-  function loop(){
-    ctx.clearRect(0,0,W,H);
-
-    confetti.forEach(c=>{
-      ctx.fillStyle=c.c;
-      ctx.fillRect(c.x,c.y,6,12);
-      c.y+=c.vy;
-    });
-
-    gears.forEach(drawGear);
-
-    ctx.textAlign="center";
-    ctx.fillStyle="#000";
-    ctx.font=`700 ${titleFont}px Poppins`;
-    ctx.fillText("Y V K",W/2,H/2);
-
-    ctx.font=`${baseFont}px Poppins`;
-    ctx.fillText("Getting DIGITAL Soon!",W/2,H/2+titleFont*0.9);
-
-    celebrationFrame = requestAnimationFrame(loop);
-  }
-  loop();
-}
-
-/* ================= GAME LOOP ================= */
-function initParticles(){
-  particles=Array.from({length:TOTAL},() => ({
-    r:6,
-    x:AREA.x+Math.random()*AREA.w,
-    y:AREA.y+Math.random()*AREA.h,
-    vx:(Math.random()-.5)*1,
-    vy:(Math.random()-.5)*1,
-    c:COLORS[Math.floor(Math.random()*COLORS.length)],
-    eaten:false
-  }));
-  eatenCount=0; halfShown=false; finished=false;
-  sparks=[];
-}
-
-function startGame(){
-  if(celebrationFrame) cancelAnimationFrame(celebrationFrame);
-  confetti=[];
-  gameStarted=true;
-  restartBtn.style.display="none";
-  initParticles();
-  showToast("COLLECT ALL COLOURFUL CIRCLES");
-  animate();
-}
-
-function animate(){
-  if(!gameStarted) return;
-
-  ctx.fillStyle="rgba(255,255,255,.3)";
-  ctx.fillRect(0,0,W,H);
-  drawBorder();
+function updateParticles(){
 
   particles.forEach(p=>{
-    if(p.eaten) return;
+
+    const dx=mouse.x-p.x;
+    const dy=mouse.y-p.y;
+
+    const dist=Math.hypot(dx,dy);
+
+    if(dist<180){
+
+      const force=(180-dist)/180;
+
+      p.vx += dx/dist * force * .02;
+      p.vy += dy/dist * force * .02;
+
+      p.life += .02;
+
+      if(Math.random()<0.02){
+        playTone(300 + Math.random()*400,.15,.01);
+      }
+
+      worldEnergy+=0.02;
+    }
+
+    p.vx*=0.98;
+    p.vy*=0.98;
 
     p.x+=p.vx;
     p.y+=p.vy;
 
-    if(p.x-p.r<AREA.x||p.x+p.r>AREA.x+AREA.w) p.vx*=-1;
-    if(p.y-p.r<AREA.y||p.y+p.r>AREA.y+AREA.h) p.vy*=-1;
+    if(p.x<0) p.x=W;
+    if(p.x>W) p.x=0;
+    if(p.y<0) p.y=H;
+    if(p.y>H) p.y=0;
+
+    const glow=10+p.life*20;
 
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=p.c;
+    ctx.arc(p.x,p.y,p.size+glow*.05,0,Math.PI*2);
+
+    ctx.fillStyle=p.color;
+    ctx.shadowBlur=glow;
+    ctx.shadowColor=p.color;
     ctx.fill();
+
+    p.life*=0.98;
   });
+
+  ctx.shadowBlur=0;
+}
+
+/* =========================
+   BREATHING AURA
+========================= */
+
+let breath=0;
+
+function drawAura(){
+
+  breath+=0.02;
+
+  const r=50 + Math.sin(breath)*8;
+
+  const grd = ctx.createRadialGradient(
+    mouse.x,
+    mouse.y,
+    0,
+    mouse.x,
+    mouse.y,
+    r
+  );
+
+  grd.addColorStop(0,"rgba(255,255,255,.25)");
+  grd.addColorStop(1,"rgba(255,255,255,0)");
+
+  ctx.fillStyle=grd;
+
+  ctx.beginPath();
+  ctx.arc(mouse.x,mouse.y,r,0,Math.PI*2);
+  ctx.fill();
+}
+
+/* =========================
+   POINTER
+========================= */
+
+function drawPointer(){
+
+  ctx.beginPath();
+  ctx.arc(mouse.x,mouse.y,4,0,Math.PI*2);
+
+  ctx.fillStyle="white";
+  ctx.fill();
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+const messages = [
+  "Breathe slowly",
+  "The world is waking up",
+  "You are doing well",
+  "Let your mind rest",
+  "Energy is returning",
+  "Stay in the moment"
+];
+
+setInterval(()=>{
+  message.textContent =
+    messages[Math.floor(Math.random()*messages.length)];
+},5000);
+
+/* =========================
+   LOOP
+========================= */
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  mouse.x += (mouse.tx - mouse.x)*0.08;
+  mouse.y += (mouse.ty - mouse.y)*0.08;
+
+  drawBackground();
+  drawStars();
+
+  addTrail();
+  drawTrails();
+
+  drawAura();
+
+  updateParticles();
 
   drawPointer();
 
-  particles.forEach(p=>{
-    if(!p.eaten && Math.hypot(mouse.x-p.x,mouse.y-p.y)<14){
-      p.eaten=true;
-      eatenCount++;
-      collectSound();
-      spawnSpark(p.x,p.y,p.c);
-    }
-  });
-
-  drawSparks();
-
-  if(!halfShown && eatenCount>=TOTAL/2){
-    halfShown=true;
-    showToast("50% MORE TO GO");
-  }
-
-  if(eatenCount===TOTAL && !finished){
-    finished=true;
-    finalScreen();
-    return;
-  }
-
-  requestAnimationFrame(animate);
+  worldEnergy*=0.995;
 }
 
-/* ================= RESTART BUTTON ================= */
-restartBtn.onclick = () => {
-  startGame();
-};
+animate();
 </script>
+
 </body>
 </html>
