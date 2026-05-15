@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Energy Garden</title>
+<title>Restore The Garden</title>
 
 <style>
 *{
@@ -16,7 +16,7 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#050816;
+  background:#0d1117;
   font-family:Poppins,sans-serif;
 }
 
@@ -29,29 +29,47 @@ canvas{
   position:fixed;
   inset:0;
   pointer-events:none;
+  color:white;
 }
 
 #title{
   position:absolute;
-  top:24px;
+  top:20px;
   left:50%;
   transform:translateX(-50%);
-  color:white;
-  font-size:clamp(18px,3vw,28px);
+  font-size:clamp(20px,3vw,34px);
   font-weight:600;
-  opacity:.85;
-  letter-spacing:1px;
+  opacity:.9;
+  letter-spacing:2px;
 }
 
 #message{
   position:absolute;
-  bottom:40px;
+  bottom:34px;
+  width:100%;
+  text-align:center;
+  font-size:clamp(14px,2vw,20px);
+  opacity:.8;
+}
+
+#progressWrap{
+  position:absolute;
+  top:80px;
   left:50%;
   transform:translateX(-50%);
-  color:white;
-  font-size:clamp(14px,2vw,20px);
-  opacity:.7;
-  transition:.4s;
+  width:min(300px,70vw);
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.1);
+  overflow:hidden;
+}
+
+#progress{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#80ffdb,#64dfdf);
+  transition:.3s;
 }
 
 #soundBtn{
@@ -61,32 +79,31 @@ canvas{
   width:46px;
   height:46px;
   border-radius:50%;
-  border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.06);
   backdrop-filter:blur(10px);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:18px;
-  color:white;
   pointer-events:auto;
   cursor:pointer;
+  font-size:18px;
 }
 
 #overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.45);
-  backdrop-filter:blur(10px);
+  background:rgba(0,0,0,.5);
   display:flex;
   align-items:center;
   justify-content:center;
   z-index:20;
+  backdrop-filter:blur(8px);
 }
 
-#overlay .card{
-  width:min(90%,400px);
-  padding:30px;
+.card{
+  width:min(90%,420px);
+  padding:32px;
   border-radius:24px;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.12);
@@ -94,25 +111,23 @@ canvas{
   color:white;
 }
 
-#overlay h2{
-  margin-bottom:10px;
-  font-size:28px;
+.card h1{
+  margin-bottom:12px;
 }
 
-#overlay p{
+.card p{
   opacity:.8;
+  line-height:1.6;
   margin-bottom:24px;
-  line-height:1.5;
 }
 
-#overlay button{
-  padding:12px 22px;
+.card button{
   border:none;
+  padding:12px 22px;
   border-radius:14px;
-  margin:0 8px;
+  margin:0 6px;
   cursor:pointer;
   font-weight:600;
-  background:white;
 }
 </style>
 </head>
@@ -122,18 +137,27 @@ canvas{
 <canvas id="canvas"></canvas>
 
 <div id="ui">
-  <div id="title">ENERGY GARDEN</div>
-  <div id="message">Move gently and restore the world</div>
+  <div id="title">RESTORE THE GARDEN</div>
+
+  <div id="progressWrap">
+    <div id="progress"></div>
+  </div>
+
+  <div id="message">
+    Touch every sleeping seed to awaken the world
+  </div>
 
   <div id="soundBtn">🔇</div>
 </div>
 
 <div id="overlay">
   <div class="card">
-    <h2>Welcome</h2>
+    <h1>Energy Garden</h1>
+
     <p>
-      Relax your mind.<br>
-      Move slowly and awaken the energy around you.
+      Move slowly.<br>
+      Awaken every sleeping seed.<br>
+      Bring life back to the garden.
     </p>
 
     <button id="soundYes">Sound On</button>
@@ -142,57 +166,46 @@ canvas{
 </div>
 
 <script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
 let W,H;
 
 function resize(){
-  W = canvas.width = innerWidth;
-  H = canvas.height = innerHeight;
+  W=canvas.width=innerWidth;
+  H=canvas.height=innerHeight;
 }
 resize();
 addEventListener("resize",resize);
 
 /* =========================
-   MOUSE
+   UI
 ========================= */
 
-const mouse = {
-  x: W/2,
-  y: H/2,
-  tx: W/2,
-  ty: H/2
-};
-
-addEventListener("mousemove",e=>{
-  mouse.tx = e.clientX;
-  mouse.ty = e.clientY;
-});
-
-addEventListener("touchmove",e=>{
-  mouse.tx = e.touches[0].clientX;
-  mouse.ty = e.touches[0].clientY;
-},{passive:true});
+const progressBar=document.getElementById("progress");
+const message=document.getElementById("message");
+const overlay=document.getElementById("overlay");
+const soundBtn=document.getElementById("soundBtn");
 
 /* =========================
    AUDIO
 ========================= */
 
-let audioCtx;
 let soundOn=false;
+let audioCtx;
 
 function initAudio(){
   if(!audioCtx){
-    audioCtx = new(window.AudioContext||webkitAudioContext)();
+    audioCtx=new(window.AudioContext||webkitAudioContext)();
   }
 }
 
 function playTone(freq=440,dur=.2,vol=.03){
+
   if(!soundOn) return;
 
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
 
   osc.type="sine";
   osc.frequency.value=freq;
@@ -200,23 +213,15 @@ function playTone(freq=440,dur=.2,vol=.03){
   gain.gain.value=vol;
   gain.gain.exponentialRampToValueAtTime(
     0.0001,
-    audioCtx.currentTime + dur
+    audioCtx.currentTime+dur
   );
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
-  osc.stop(audioCtx.currentTime + dur);
+  osc.stop(audioCtx.currentTime+dur);
 }
-
-/* =========================
-   UI
-========================= */
-
-const overlay=document.getElementById("overlay");
-const soundBtn=document.getElementById("soundBtn");
-const message=document.getElementById("message");
 
 document.getElementById("soundYes").onclick=()=>{
   soundOn=true;
@@ -227,11 +232,11 @@ document.getElementById("soundYes").onclick=()=>{
 };
 
 document.getElementById("soundNo").onclick=()=>{
-  soundOn=false;
   overlay.style.display="none";
 };
 
 soundBtn.onclick=()=>{
+
   soundOn=!soundOn;
 
   if(soundOn){
@@ -244,33 +249,37 @@ soundBtn.onclick=()=>{
 };
 
 /* =========================
-   BACKGROUND GLOW
+   MOUSE
 ========================= */
 
-let worldEnergy=0;
+const mouse={
+  x:W/2,
+  y:H/2,
+  tx:W/2,
+  ty:H/2
+};
 
-function drawBackground(){
+addEventListener("mousemove",e=>{
+  mouse.tx=e.clientX;
+  mouse.ty=e.clientY;
+});
 
-  const grd = ctx.createRadialGradient(
-    W/2,H/2,
-    100,
-    W/2,H/2,
-    W
-  );
+addEventListener("touchmove",e=>{
+  mouse.tx=e.touches[0].clientX;
+  mouse.ty=e.touches[0].clientY;
+},{passive:true});
 
-  grd.addColorStop(0,`rgba(${20+worldEnergy*0.3},${40+worldEnergy*0.5},120,.25)`);
-  grd.addColorStop(1,"#050816");
+/* =========================
+   WORLD
+========================= */
 
-  ctx.fillStyle=grd;
-  ctx.fillRect(0,0,W,H);
-
-}
+let worldLife=0;
 
 /* =========================
    STARS
 ========================= */
 
-const stars = Array.from({length:120},()=>({
+const stars=Array.from({length:120},()=>({
   x:Math.random()*W,
   y:Math.random()*H,
   r:Math.random()*2,
@@ -278,19 +287,93 @@ const stars = Array.from({length:120},()=>({
 }));
 
 function drawStars(){
+
   stars.forEach(s=>{
+
     ctx.beginPath();
     ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${s.a})`;
+
+    ctx.fillStyle=`rgba(255,255,255,${s.a*.6})`;
     ctx.fill();
   });
 }
 
 /* =========================
-   PARTICLES
+   BACKGROUND
 ========================= */
 
-const COLORS = [
+function drawBackground(){
+
+  const life=Math.min(worldLife,100);
+
+  const grd=ctx.createLinearGradient(0,0,0,H);
+
+  grd.addColorStop(
+    0,
+    `rgb(${10+life},${15+life*.8},${30+life})`
+  );
+
+  grd.addColorStop(
+    1,
+    `rgb(${5},${20+life*.7},${20+life*.5})`
+  );
+
+  ctx.fillStyle=grd;
+  ctx.fillRect(0,0,W,H);
+}
+
+/* =========================
+   FLOWERS
+========================= */
+
+const flowers=[];
+
+function spawnFlower(x,y,color){
+
+  flowers.push({
+    x,y,
+    r:0,
+    max:15+Math.random()*20,
+    color,
+    petals:5+Math.floor(Math.random()*4)
+  });
+}
+
+function drawFlowers(){
+
+  flowers.forEach(f=>{
+
+    if(f.r<f.max){
+      f.r+=0.3;
+    }
+
+    for(let i=0;i<f.petals;i++){
+
+      const angle=(Math.PI*2/f.petals)*i;
+
+      const px=f.x+Math.cos(angle)*f.r;
+      const py=f.y+Math.sin(angle)*f.r;
+
+      ctx.beginPath();
+      ctx.arc(px,py,f.r*.45,0,Math.PI*2);
+
+      ctx.fillStyle=f.color;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.r*.35,0,Math.PI*2);
+
+    ctx.fillStyle="#fff8";
+    ctx.fill();
+  });
+}
+
+/* =========================
+   SEEDS
+========================= */
+
+const COLORS=[
   "#80ffdb",
   "#72efdd",
   "#64dfdf",
@@ -298,143 +381,74 @@ const COLORS = [
   "#5e60ce"
 ];
 
+const TOTAL=20;
+
+let awakened=0;
+
+const seeds=[];
+
+function createSeeds(){
+
+  seeds.length=0;
+
+  for(let i=0;i<TOTAL;i++){
+
+    seeds.push({
+      x:80+Math.random()*(W-160),
+      y:100+Math.random()*(H-200),
+      r:8,
+      pulse:Math.random()*10,
+      active:true,
+      color:COLORS[
+        Math.floor(Math.random()*COLORS.length)
+      ]
+    });
+  }
+}
+
+createSeeds();
+
+/* =========================
+   PARTICLES
+========================= */
+
 const particles=[];
 
-for(let i=0;i<70;i++){
-  particles.push({
-    x:Math.random()*W,
-    y:Math.random()*H,
-    vx:(Math.random()-.5)*0.5,
-    vy:(Math.random()-.5)*0.5,
-    size:2+Math.random()*4,
-    color:COLORS[Math.floor(Math.random()*COLORS.length)],
-    life:0
-  });
-}
+function spawnParticles(x,y,color){
 
-/* =========================
-   TRAILS
-========================= */
+  for(let i=0;i<12;i++){
 
-const trails=[];
-
-function addTrail(){
-  trails.push({
-    x:mouse.x,
-    y:mouse.y,
-    life:1
-  });
-
-  if(trails.length>50){
-    trails.shift();
+    particles.push({
+      x,y,
+      vx:(Math.random()-.5)*4,
+      vy:(Math.random()-.5)*4,
+      life:1,
+      color
+    });
   }
 }
 
-function drawTrails(){
+function drawParticles(){
 
-  for(let i=0;i<trails.length;i++){
+  for(let i=particles.length-1;i>=0;i--){
 
-    const t=trails[i];
-
-    ctx.beginPath();
-    ctx.arc(t.x,t.y,20*t.life,0,Math.PI*2);
-
-    ctx.fillStyle=`rgba(120,255,220,${t.life*.08})`;
-    ctx.fill();
-
-    t.life-=0.02;
-  }
-
-  while(trails.length && trails[0].life<=0){
-    trails.shift();
-  }
-}
-
-/* =========================
-   PARTICLE LOGIC
-========================= */
-
-function updateParticles(){
-
-  particles.forEach(p=>{
-
-    const dx=mouse.x-p.x;
-    const dy=mouse.y-p.y;
-
-    const dist=Math.hypot(dx,dy);
-
-    if(dist<180){
-
-      const force=(180-dist)/180;
-
-      p.vx += dx/dist * force * .02;
-      p.vy += dy/dist * force * .02;
-
-      p.life += .02;
-
-      if(Math.random()<0.02){
-        playTone(300 + Math.random()*400,.15,.01);
-      }
-
-      worldEnergy+=0.02;
-    }
-
-    p.vx*=0.98;
-    p.vy*=0.98;
+    const p=particles[i];
 
     p.x+=p.vx;
     p.y+=p.vy;
 
-    if(p.x<0) p.x=W;
-    if(p.x>W) p.x=0;
-    if(p.y<0) p.y=H;
-    if(p.y>H) p.y=0;
-
-    const glow=10+p.life*20;
+    p.life-=0.02;
 
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size+glow*.05,0,Math.PI*2);
+    ctx.arc(p.x,p.y,3*p.life,0,Math.PI*2);
 
-    ctx.fillStyle=p.color;
-    ctx.shadowBlur=glow;
-    ctx.shadowColor=p.color;
+    ctx.fillStyle=`rgba(255,255,255,${p.life})`;
     ctx.fill();
 
-    p.life*=0.98;
-  });
-
-  ctx.shadowBlur=0;
-}
-
-/* =========================
-   BREATHING AURA
-========================= */
-
-let breath=0;
-
-function drawAura(){
-
-  breath+=0.02;
-
-  const r=50 + Math.sin(breath)*8;
-
-  const grd = ctx.createRadialGradient(
-    mouse.x,
-    mouse.y,
-    0,
-    mouse.x,
-    mouse.y,
-    r
-  );
-
-  grd.addColorStop(0,"rgba(255,255,255,.25)");
-  grd.addColorStop(1,"rgba(255,255,255,0)");
-
-  ctx.fillStyle=grd;
-
-  ctx.beginPath();
-  ctx.arc(mouse.x,mouse.y,r,0,Math.PI*2);
-  ctx.fill();
+    if(p.life<=0){
+      particles.splice(i,1);
+    }
+  }
 }
 
 /* =========================
@@ -444,29 +458,109 @@ function drawAura(){
 function drawPointer(){
 
   ctx.beginPath();
-  ctx.arc(mouse.x,mouse.y,4,0,Math.PI*2);
+  ctx.arc(mouse.x,mouse.y,8,0,Math.PI*2);
 
   ctx.fillStyle="white";
+  ctx.shadowBlur=20;
+  ctx.shadowColor="#ffffff";
+
   ctx.fill();
+
+  ctx.shadowBlur=0;
 }
 
 /* =========================
-   MESSAGES
+   GAME
 ========================= */
 
-const messages = [
-  "Breathe slowly",
-  "The world is waking up",
-  "You are doing well",
-  "Let your mind rest",
-  "Energy is returning",
-  "Stay in the moment"
-];
+function updateSeeds(){
 
-setInterval(()=>{
-  message.textContent =
-    messages[Math.floor(Math.random()*messages.length)];
-},5000);
+  seeds.forEach(seed=>{
+
+    if(!seed.active) return;
+
+    seed.pulse+=0.05;
+
+    const glow=8+Math.sin(seed.pulse)*4;
+
+    ctx.beginPath();
+    ctx.arc(seed.x,seed.y,seed.r,0,Math.PI*2);
+
+    ctx.fillStyle=seed.color;
+
+    ctx.shadowBlur=glow;
+    ctx.shadowColor=seed.color;
+
+    ctx.fill();
+
+    ctx.shadowBlur=0;
+
+    const dist=Math.hypot(
+      mouse.x-seed.x,
+      mouse.y-seed.y
+    );
+
+    if(dist<22){
+
+      seed.active=false;
+
+      awakened++;
+
+      worldLife+=5;
+
+      progressBar.style.width=
+        (awakened/TOTAL)*100 + "%";
+
+      spawnFlower(seed.x,seed.y,seed.color);
+
+      spawnParticles(seed.x,seed.y,seed.color);
+
+      playTone(
+        300 + awakened*20,
+        .25,
+        .03
+      );
+
+      if(awakened===Math.floor(TOTAL/2)){
+        message.textContent=
+          "The garden is breathing again";
+      }
+
+      if(awakened===TOTAL){
+
+        message.textContent=
+          "The garden is fully alive ✨";
+
+        celebration();
+      }
+    }
+  });
+}
+
+/* =========================
+   CELEBRATION
+========================= */
+
+function celebration(){
+
+  for(let i=0;i<50;i++){
+
+    spawnParticles(
+      Math.random()*W,
+      Math.random()*H,
+      COLORS[Math.floor(Math.random()*COLORS.length)]
+    );
+  }
+
+  if(soundOn){
+
+    [440,520,660,880].forEach((f,i)=>{
+      setTimeout(()=>{
+        playTone(f,.4,.04);
+      },i*140);
+    });
+  }
+}
 
 /* =========================
    LOOP
@@ -476,22 +570,20 @@ function animate(){
 
   requestAnimationFrame(animate);
 
-  mouse.x += (mouse.tx - mouse.x)*0.08;
-  mouse.y += (mouse.ty - mouse.y)*0.08;
+  mouse.x += (mouse.tx-mouse.x)*0.1;
+  mouse.y += (mouse.ty-mouse.y)*0.1;
 
   drawBackground();
+
   drawStars();
 
-  addTrail();
-  drawTrails();
+  drawFlowers();
 
-  drawAura();
+  updateSeeds();
 
-  updateParticles();
+  drawParticles();
 
   drawPointer();
-
-  worldEnergy*=0.995;
 }
 
 animate();
