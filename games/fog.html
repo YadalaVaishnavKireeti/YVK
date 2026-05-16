@@ -19,6 +19,8 @@ html,body{
 
 body{
   background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1400&auto=format&fit=crop') center/cover no-repeat;
+  background-size:cover;
+  background-position:center;
 }
 
 canvas{
@@ -36,12 +38,14 @@ canvas{
   background:rgba(255,255,255,.25);
   border-radius:999px;
   overflow:hidden;
+  z-index:5;
 }
 
 #progress{
   width:0%;
   height:100%;
   background:#fff;
+  transition:.15s linear;
 }
 
 #hint{
@@ -50,6 +54,8 @@ canvas{
   width:100%;
   text-align:center;
   color:#fff;
+  font-size:15px;
+  z-index:5;
 }
 
 #endScreen{
@@ -58,8 +64,9 @@ canvas{
   display:none;
   align-items:center;
   justify-content:center;
-  background:rgba(255,255,255,.2);
+  background:rgba(255,255,255,.15);
   backdrop-filter:blur(6px);
+  z-index:20;
 }
 
 .endCard{
@@ -68,11 +75,17 @@ canvas{
 }
 
 .endCard h1{
-  font-size:clamp(42px,8vw,82px);
+  font-size:clamp(46px,8vw,82px);
+  margin:0;
+}
+
+.endCard p{
+  margin-top:12px;
+  opacity:.9;
 }
 
 .buttons{
-  margin-top:24px;
+  margin-top:28px;
   display:flex;
   justify-content:center;
   gap:14px;
@@ -84,6 +97,13 @@ canvas{
   padding:12px 22px;
   border-radius:12px;
   cursor:pointer;
+  font-weight:600;
+}
+
+#confettiCanvas{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
 }
 </style>
 </head>
@@ -101,6 +121,8 @@ canvas{
 <canvas id="canvas"></canvas>
 
 <div id="endScreen">
+
+  <canvas id="confettiCanvas"></canvas>
 
   <div class="endCard">
 
@@ -121,6 +143,9 @@ canvas{
 const canvas=document.getElementById('canvas');
 const ctx=canvas.getContext('2d',{willReadFrequently:true});
 
+const confettiCanvas=document.getElementById('confettiCanvas');
+const confettiCtx=confettiCanvas.getContext('2d');
+
 const progress=document.getElementById('progress');
 
 let W,H;
@@ -130,19 +155,33 @@ function resize(){
   W=canvas.width=innerWidth;
   H=canvas.height=innerHeight;
 
+  confettiCanvas.width=W;
+  confettiCanvas.height=H;
+
   drawFog();
 }
+
 resize();
 
 addEventListener('resize',resize);
 
+/* =========================
+   FOG
+========================= */
+
 function drawFog(){
+
+  ctx.clearRect(0,0,W,H);
 
   ctx.fillStyle='rgba(220,230,235,.97)';
   ctx.fillRect(0,0,W,H);
 }
 
 let finished=false;
+
+/* =========================
+   ERASE
+========================= */
 
 function clearFog(x,y){
 
@@ -152,7 +191,10 @@ function clearFog(x,y){
 
   ctx.globalCompositeOperation='destination-out';
 
-  const g=ctx.createRadialGradient(x,y,0,x,y,80);
+  const g=ctx.createRadialGradient(
+    x,y,0,
+    x,y,80
+  );
 
   g.addColorStop(0,'rgba(0,0,0,1)');
   g.addColorStop(1,'rgba(0,0,0,0)');
@@ -179,6 +221,10 @@ canvas.addEventListener('touchmove',e=>{
   );
 },{passive:true});
 
+/* =========================
+   REAL PROGRESS CHECK
+========================= */
+
 function checkProgress(){
 
   const imageData=
@@ -188,7 +234,7 @@ function checkProgress(){
 
   for(let i=3;i<imageData.length;i+=80){
 
-    if(imageData[i]<40){
+    if(imageData[i] < 20){
       transparent++;
     }
   }
@@ -198,16 +244,94 @@ function checkProgress(){
   const percent=(transparent/total)*100;
 
   progress.style.width=
-  percent+'%';
+  Math.min(percent,100)+'%';
 
-  if(percent>97){
+  if(percent > 99.4){
 
     finished=true;
 
-    document.getElementById('endScreen')
-    .style.display='flex';
+    finalScreen();
   }
 }
+
+/* =========================
+   CONFETTI
+========================= */
+
+let confetti=[];
+
+function spawnConfetti(){
+
+  confetti=[];
+
+  const colors=[
+    '#ffffff',
+    '#dff6ff',
+    '#caf0f8'
+  ];
+
+  for(let i=0;i<120;i++){
+
+    confetti.push({
+
+      x:Math.random()*W,
+      y:-20,
+
+      vy:2+Math.random()*3,
+
+      size:4+Math.random()*6,
+
+      c:colors[
+        Math.floor(
+          Math.random()*colors.length
+        )
+      ]
+    });
+  }
+}
+
+function drawConfetti(){
+
+  confettiCtx.clearRect(0,0,W,H);
+
+  confetti.forEach(c=>{
+
+    confettiCtx.fillStyle=c.c;
+
+    confettiCtx.fillRect(
+      c.x,
+      c.y,
+      c.size,
+      c.size*1.8
+    );
+
+    c.y+=c.vy;
+
+    if(c.y>H+20){
+      c.y=-20;
+    }
+  });
+
+  requestAnimationFrame(drawConfetti);
+}
+
+/* =========================
+   FINAL
+========================= */
+
+function finalScreen(){
+
+  document.getElementById('endScreen')
+  .style.display='flex';
+
+  spawnConfetti();
+
+  drawConfetti();
+}
+
+/* =========================
+   RESTART
+========================= */
 
 function restartGame(){
 
@@ -215,13 +339,18 @@ function restartGame(){
 
   progress.style.width='0%';
 
-  drawFog();
-
   document.getElementById('endScreen')
   .style.display='none';
+
+  drawFog();
 }
 
+/* =========================
+   HOME
+========================= */
+
 function goHome(){
+
   window.location.href='../index.html';
 }
 </script>
