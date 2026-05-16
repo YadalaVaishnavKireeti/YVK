@@ -183,26 +183,12 @@ function resize(){
   H=canvas.height=innerHeight;
 }
 resize();
-addEventListener('resize',resize);
+addEventListener("resize",resize);
 
-const progress=document.getElementById('progress');
+const progressBar=document.getElementById("progress");
+const message=document.getElementById("message");
 
-const mouse={
-  x:W/2,
-  y:H/2,
-  tx:W/2,
-  ty:H/2
-};
-
-addEventListener('mousemove',e=>{
-  mouse.tx=e.clientX;
-  mouse.ty=e.clientY;
-});
-
-addEventListener('touchmove',e=>{
-  mouse.tx=e.touches[0].clientX;
-  mouse.ty=e.touches[0].clientY;
-},{passive:true});
+/* ================= AUDIO ================= */
 
 let audioCtx;
 let soundOn=false;
@@ -213,7 +199,7 @@ function initAudio(){
   }
 }
 
-function playSeedSound(){
+function playBeep(freq=620,duration=0.08){
 
   if(!soundOn || !audioCtx) return;
 
@@ -221,73 +207,102 @@ function playSeedSound(){
   const gain=audioCtx.createGain();
 
   osc.type='sine';
-  osc.frequency.value=620;
+  osc.frequency.value=freq;
 
-  gain.gain.value=0.08;
+  gain.gain.value=0.06;
 
   gain.gain.exponentialRampToValueAtTime(
-    0.001,
-    audioCtx.currentTime+0.18
+    0.0001,
+    audioCtx.currentTime + duration
   );
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
-  osc.stop(audioCtx.currentTime+0.18);
+  osc.stop(audioCtx.currentTime + duration);
 }
 
-document.getElementById('audioYes').onclick=()=>{
-  soundOn=true;
+/* ================= AUDIO PROMPT ================= */
+
+document.getElementById("audioYes").onclick=async()=>{
+
   initAudio();
-  audioCtx.resume();
-  document.getElementById('audioPrompt').style.display='none';
+
+  await audioCtx.resume();
+
+  soundOn=true;
+
+  document.getElementById("soundToggle").textContent='🔊';
+
+  document.getElementById("audioPrompt").style.display='none';
 };
 
-document.getElementById('audioNo').onclick=()=>{
-  document.getElementById('audioPrompt').style.display='none';
+document.getElementById("audioNo").onclick=()=>{
+
+  soundOn=false;
+
+  document.getElementById("soundToggle").textContent='🔇';
+
+  document.getElementById("audioPrompt").style.display='none';
 };
+
+document.getElementById("soundToggle").onclick=async()=>{
+
+  soundOn=!soundOn;
+
+  document.getElementById("soundToggle").textContent=
+  soundOn ? '🔊' : '🔇';
+
+  if(soundOn){
+
+    initAudio();
+
+    await audioCtx.resume();
+  }
+};
+
+/* ================= POINTER ================= */
+
+const mouse={
+  x:W/2,
+  y:H/2,
+  tx:W/2,
+  ty:H/2
+};
+
+addEventListener("mousemove",e=>{
+  mouse.tx=e.clientX;
+  mouse.ty=e.clientY;
+});
+
+addEventListener("touchmove",e=>{
+  mouse.tx=e.touches[0].clientX;
+  mouse.ty=e.touches[0].clientY;
+},{passive:true});
+
+/* ================= COLORS ================= */
 
 const COLORS=[
-'#a7c957',
-'#6a994e',
-'#84a98c',
-'#588157'
+  '#8ecae6',
+  '#90be6d',
+  '#f9c74f',
+  '#f9844a',
+  '#b8e0d2'
 ];
 
+/* ================= FLOWERS ================= */
+
 const flowers=[];
-const TOTAL=20;
-
-let awakened=0;
-
-const seeds=[];
-
-function createSeeds(){
-
-  seeds.length=0;
-
-  for(let i=0;i<TOTAL;i++){
-
-    seeds.push({
-      x:80+Math.random()*(W-160),
-      y:120+Math.random()*(H-240),
-      r:8,
-      pulse:Math.random()*10,
-      active:true,
-      color:COLORS[Math.floor(Math.random()*COLORS.length)]
-    });
-  }
-}
-
-createSeeds();
 
 function spawnFlower(x,y,color){
 
   flowers.push({
-    x,y,
+    x,
+    y,
     r:0,
-    max:18+Math.random()*18,
-    petals:5+Math.floor(Math.random()*3),
+    max:16+Math.random()*12,
+    petals:6,
     color
   });
 }
@@ -297,7 +312,7 @@ function drawFlowers(){
   flowers.forEach(f=>{
 
     if(f.r<f.max){
-      f.r+=0.22;
+      f.r+=0.25;
     }
 
     for(let i=0;i<f.petals;i++){
@@ -312,7 +327,7 @@ function drawFlowers(){
       ctx.arc(
         px,
         py,
-        f.r*0.42,
+        f.r*0.38,
         0,
         Math.PI*2
       );
@@ -326,17 +341,151 @@ function drawFlowers(){
     ctx.arc(
       f.x,
       f.y,
-      f.r*0.28,
+      f.r*0.22,
       0,
       Math.PI*2
     );
 
-    ctx.fillStyle='#fff8d6';
+    ctx.fillStyle='#fff';
     ctx.fill();
   });
 }
 
-function drawSeeds(){
+/* ================= SEEDS ================= */
+
+const TOTAL=20;
+
+let awakened=0;
+
+const seeds=[];
+
+function createSeeds(){
+
+  seeds.length=0;
+
+  for(let i=0;i<TOTAL;i++){
+
+    seeds.push({
+
+      x:80+Math.random()*(W-160),
+
+      y:120+Math.random()*(H-220),
+
+      r:8,
+
+      pulse:Math.random()*10,
+
+      active:true,
+
+      color:COLORS[
+        Math.floor(
+          Math.random()*COLORS.length
+        )
+      ]
+    });
+  }
+}
+
+createSeeds();
+
+/* ================= CONFETTI ================= */
+
+let confetti=[];
+
+function spawnConfetti(){
+
+  confetti=[];
+
+  for(let i=0;i<100;i++){
+
+    confetti.push({
+
+      x:Math.random()*W,
+
+      y:-20,
+
+      vy:2+Math.random()*3,
+
+      size:4+Math.random()*8,
+
+      color:COLORS[
+        Math.floor(
+          Math.random()*COLORS.length
+        )
+      ]
+    });
+  }
+}
+
+function drawConfetti(){
+
+  confetti.forEach(c=>{
+
+    ctx.fillStyle=c.color;
+
+    ctx.fillRect(
+      c.x,
+      c.y,
+      c.size,
+      c.size*1.8
+    );
+
+    c.y+=c.vy;
+  });
+}
+
+/* ================= END SCREEN ================= */
+
+let finished=false;
+
+function finalScreen(){
+
+  spawnConfetti();
+
+  document.getElementById(
+    'endScreen'
+  ).style.display='flex';
+}
+
+function restartGame(){
+
+  awakened=0;
+
+  finished=false;
+
+  flowers.length=0;
+
+  confetti=[];
+
+  progressBar.style.width='0%';
+
+  message.textContent=
+  'Touch every sleeping seed to awaken the garden';
+
+  createSeeds();
+
+  document.getElementById(
+    'endScreen'
+  ).style.display='none';
+}
+
+function goHome(){
+  window.location.href='../index.html';
+}
+
+/* ================= LOOP ================= */
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  mouse.x += (mouse.tx-mouse.x)*0.1;
+  mouse.y += (mouse.ty-mouse.y)*0.1;
+
+  ctx.fillStyle='#f7f7f2';
+  ctx.fillRect(0,0,W,H);
+
+  drawFlowers();
 
   seeds.forEach(seed=>{
 
@@ -349,21 +498,14 @@ function drawSeeds(){
     ctx.arc(
       seed.x,
       seed.y,
-      seed.r,
+      seed.r + Math.sin(seed.pulse)*1.5,
       0,
       Math.PI*2
     );
 
     ctx.fillStyle=seed.color;
 
-    ctx.shadowBlur=
-      10+Math.sin(seed.pulse)*5;
-
-    ctx.shadowColor=seed.color;
-
     ctx.fill();
-
-    ctx.shadowBlur=0;
 
     const dist=Math.hypot(
       mouse.x-seed.x,
@@ -376,8 +518,7 @@ function drawSeeds(){
 
       awakened++;
 
-      progress.style.width=
-        (awakened/TOTAL)*100+'%';
+      playBeep();
 
       spawnFlower(
         seed.x,
@@ -385,18 +526,24 @@ function drawSeeds(){
         seed.color
       );
 
-      playSeedSound();
+      progressBar.style.width=
+      (awakened/TOTAL)*100+'%';
 
-      if(awakened===TOTAL){
+      if(awakened===TOTAL && !finished){
 
-        document.getElementById('endScreen')
-        .style.display='flex';
+        finished=true;
+
+        message.textContent=
+        'The garden is fully alive ✨';
+
+        setTimeout(()=>{
+          finalScreen();
+        },900);
       }
     }
   });
-}
 
-function drawPointer(){
+  drawConfetti();
 
   ctx.beginPath();
 
@@ -410,39 +557,6 @@ function drawPointer(){
 
   ctx.fillStyle='#222';
   ctx.fill();
-}
-
-function restartGame(){
-
-  awakened=0;
-
-  flowers.length=0;
-
-  createSeeds();
-
-  progress.style.width='0%';
-
-  document.getElementById('endScreen')
-  .style.display='none';
-}
-
-function goHome(){
-  window.location.href='../index.html';
-}
-
-function animate(){
-
-  requestAnimationFrame(animate);
-
-  mouse.x+=(mouse.tx-mouse.x)*0.1;
-  mouse.y+=(mouse.ty-mouse.y)*0.1;
-
-  ctx.fillStyle='#f7f7f4';
-  ctx.fillRect(0,0,W,H);
-
-  drawFlowers();
-  drawSeeds();
-  drawPointer();
 }
 
 animate();
