@@ -1,3 +1,6 @@
+<!-- =========================
+fog.html
+========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,21 +31,20 @@ canvas{
 
 #progressWrap{
   position:absolute;
-  top:22px;
+  top:20px;
   left:50%;
   transform:translateX(-50%);
   width:min(320px,70vw);
   height:10px;
-  background:rgba(255,255,255,.2);
+  background:rgba(255,255,255,.25);
   border-radius:999px;
   overflow:hidden;
-  z-index:5;
 }
 
 #progress{
   width:0%;
   height:100%;
-  background:#fff;
+  background:white;
 }
 
 #hint{
@@ -50,50 +52,32 @@ canvas{
   bottom:24px;
   width:100%;
   text-align:center;
-  color:#fff;
-  font-size:18px;
+  color:white;
 }
 
 #endScreen{
   position:fixed;
   inset:0;
   display:none;
-  z-index:50;
-}
-
-#endCanvas{
-  position:absolute;
-  inset:0;
-}
-
-#endContent{
-  position:absolute;
-  inset:0;
-  display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  text-align:center;
-  color:#fff;
-}
-
-#endContent h1{
-  font-size:clamp(44px,7vw,82px);
+  background:rgba(0,0,0,.2);
+  color:white;
+  backdrop-filter:blur(4px);
 }
 
 .buttons{
-  margin-top:26px;
   display:flex;
-  gap:14px;
-  flex-wrap:wrap;
+  gap:12px;
+  margin-top:24px;
 }
 
 .buttons button{
-  padding:12px 24px;
+  padding:12px 20px;
   border:none;
   border-radius:12px;
   cursor:pointer;
-  font-weight:600;
 }
 </style>
 </head>
@@ -105,26 +89,22 @@ canvas{
 </div>
 
 <div id="hint">
-  Clean the fog slowly
+  Clear every part of the fog
 </div>
 
 <canvas id="canvas"></canvas>
 
 <div id="endScreen">
 
-  <canvas id="endCanvas"></canvas>
+  <h1>☀ CLEAR</h1>
 
-  <div id="endContent">
+  <p style="margin-top:10px;">
+    Getting DIGITAL Soon!
+  </p>
 
-    <h1>☀ CLEAR</h1>
-
-    <p>Getting DIGITAL Soon!</p>
-
-    <div class="buttons">
-      <button onclick="restartGame()">Play Again</button>
-      <button onclick="goHome()">Homepage</button>
-    </div>
-
+  <div class="buttons">
+    <button onclick="restartGame()">Play Again</button>
+    <button onclick="goHome()">Homepage</button>
   </div>
 
 </div>
@@ -133,32 +113,26 @@ canvas{
 const canvas=document.getElementById('canvas');
 const ctx=canvas.getContext('2d');
 
-const endCanvas=document.getElementById('endCanvas');
-const endCtx=endCanvas.getContext('2d');
-
 const progress=document.getElementById('progress');
 
 let W,H;
 
 function resize(){
 
-  W=canvas.width=endCanvas.width=innerWidth;
-  H=canvas.height=endCanvas.height=innerHeight;
+  W=canvas.width=innerWidth;
+  H=canvas.height=innerHeight;
 
   drawFog();
 }
-
 resize();
 
 addEventListener('resize',resize);
 
 function drawFog(){
 
-  ctx.fillStyle='rgba(220,230,235,.97)';
+  ctx.fillStyle='rgba(220,230,235,.96)';
   ctx.fillRect(0,0,W,H);
 }
-
-let cleanedMap=new Set();
 
 let finished=false;
 
@@ -168,47 +142,72 @@ function clearFog(x,y){
 
   ctx.save();
 
-  ctx.globalCompositeOperation='destination-out';
+  ctx.globalCompositeOperation=
+    'destination-out';
 
-  const g=ctx.createRadialGradient(
-    x,y,0,
-    x,y,80
-  );
+  const g=
+    ctx.createRadialGradient(
+      x,y,10,
+      x,y,110
+    );
 
   g.addColorStop(0,'rgba(0,0,0,1)');
+  g.addColorStop(.7,'rgba(0,0,0,.7)');
   g.addColorStop(1,'rgba(0,0,0,0)');
 
   ctx.fillStyle=g;
 
   ctx.beginPath();
 
-  ctx.arc(x,y,80,0,Math.PI*2);
+  ctx.arc(
+    x,
+    y,
+    110,
+    0,
+    Math.PI*2
+  );
 
   ctx.fill();
 
   ctx.restore();
 
-  const gx=Math.floor(x/20);
-  const gy=Math.floor(y/20);
+  checkFogCompletion();
+}
 
-  const key=`${gx}-${gy}`;
+function checkFogCompletion(){
 
-  if(!cleanedMap.has(key)){
+  const sample=
+    ctx.getImageData(
+      0,
+      0,
+      W,
+      H
+    ).data;
 
-    cleanedMap.add(key);
+  let fogPixels=0;
 
-    const percent=
-    (cleanedMap.size/420)*100;
+  for(let i=3;i<sample.length;i+=32){
 
-    progress.style.width=
-    Math.min(percent,100)+'%';
-
-    if(cleanedMap.size>=420){
-
-      finished=true;
-
-      finalScreen();
+    if(sample[i]>20){
+      fogPixels++;
     }
+  }
+
+  const total=
+    sample.length/32;
+
+  const cleared=
+    ((total-fogPixels)/total)*100;
+
+  progress.style.width=
+    Math.min(cleared,100)+'%';
+
+  if(cleared>=99.2 && !finished){
+
+    finished=true;
+
+    document.getElementById('endScreen')
+    .style.display='flex';
   }
 }
 
@@ -223,78 +222,16 @@ canvas.addEventListener('touchmove',e=>{
   );
 },{passive:true});
 
-let confetti=[];
-
-function spawnConfetti(){
-
-  confetti=[];
-
-  const colors=[
-    '#ffffff',
-    '#dff6ff',
-    '#caf0f8'
-  ];
-
-  for(let i=0;i<120;i++){
-
-    confetti.push({
-
-      x:Math.random()*W,
-      y:-20,
-
-      vy:2+Math.random()*3,
-
-      c:colors[
-        Math.floor(
-          Math.random()*colors.length
-        )
-      ]
-    });
-  }
-}
-
-function finalScreen(){
-
-  spawnConfetti();
-
-  document.getElementById('endScreen')
-  .style.display='block';
-
-  function loop(){
-
-    endCtx.clearRect(0,0,W,H);
-
-    confetti.forEach(c=>{
-
-      endCtx.fillStyle=c.c;
-
-      endCtx.fillRect(c.x,c.y,6,12);
-
-      c.y+=c.vy;
-
-      if(c.y>H+20){
-        c.y=-20;
-      }
-    });
-
-    requestAnimationFrame(loop);
-  }
-
-  loop();
-}
-
 function restartGame(){
 
   finished=false;
 
-  cleanedMap.clear();
+  drawFog();
 
   progress.style.width='0%';
 
   document.getElementById('endScreen')
   .style.display='none';
-
-  drawFog();
 }
 
 function goHome(){
