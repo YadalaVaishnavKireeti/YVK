@@ -196,6 +196,7 @@ function beep(freq=700,dur=0.08,vol=0.04){
   osc.frequency.value=freq;
 
   gain.gain.value=vol;
+
   gain.gain.exponentialRampToValueAtTime(
     0.0001,
     audioCtx.currentTime+dur
@@ -209,25 +210,39 @@ function beep(freq=700,dur=0.08,vol=0.04){
 }
 
 function celebrationChimes(){
+
   if(!soundOn) return;
 
   [523,659,784,1046].forEach((f,i)=>{
+
     setTimeout(()=>{
+
       beep(f,0.4,0.05);
+
     },i*180);
+
   });
 }
 
 document.getElementById("audioYes").onclick=()=>{
+
   initAudio();
   audioCtx.resume();
+
   soundOn=true;
-  document.getElementById("audioPrompt").style.display="none";
+
+  document.getElementById(
+    "audioPrompt"
+  ).style.display="none";
 };
 
 document.getElementById("audioNo").onclick=()=>{
+
   soundOn=false;
-  document.getElementById("audioPrompt").style.display="none";
+
+  document.getElementById(
+    "audioPrompt"
+  ).style.display="none";
 };
 
 /* UI */
@@ -237,6 +252,7 @@ const message=document.getElementById("message");
 const buttons=document.getElementById("buttons");
 
 function goHome(){
+
   window.location.href='../index.html';
 }
 
@@ -250,34 +266,63 @@ const mouse={
 };
 
 addEventListener("mousemove",e=>{
+
   mouse.tx=e.clientX;
   mouse.ty=e.clientY;
 });
 
 addEventListener("touchmove",e=>{
+
   mouse.tx=e.touches[0].clientX;
   mouse.ty=e.touches[0].clientY;
+
 },{passive:true});
 
-/* BACKGROUND */
+/* REAL GARDEN BACKGROUND */
+
+const gardenImage=new Image();
+
+gardenImage.src=
+'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=1400&auto=format&fit=crop';
 
 let worldLife=0;
 
 function drawBackground(){
 
-  const grd=ctx.createLinearGradient(0,0,0,H);
+  ctx.fillStyle='#f3f3ef';
+  ctx.fillRect(0,0,W,H);
 
-  grd.addColorStop(
+  ctx.save();
+
+  const blurAmount=Math.max(
     0,
-    `rgb(${242-worldLife},248,242)`
+    14-(worldLife*0.55)
   );
 
-  grd.addColorStop(
-    1,
-    `rgb(${232-worldLife*.4},240,232)`
+  ctx.filter=`blur(${blurAmount}px)`;
+
+  ctx.globalAlpha=Math.min(
+    0.25+(worldLife*0.03),
+    1
   );
 
-  ctx.fillStyle=grd;
+  ctx.drawImage(
+    gardenImage,
+    0,
+    0,
+    W,
+    H
+  );
+
+  ctx.restore();
+
+  ctx.fillStyle=`rgba(
+    255,
+    255,
+    255,
+    ${0.72-(worldLife*0.02)}
+  )`;
+
   ctx.fillRect(0,0,W,H);
 }
 
@@ -329,7 +374,13 @@ function drawFlowers(){
 
     ctx.beginPath();
 
-    ctx.arc(f.x,f.y,f.r*.22,0,Math.PI*2);
+    ctx.arc(
+      f.x,
+      f.y,
+      f.r*.22,
+      0,
+      Math.PI*2
+    );
 
     ctx.fillStyle="#fff";
     ctx.fill();
@@ -375,9 +426,11 @@ function drawParticles(){
     );
 
     ctx.fillStyle=`rgba(255,255,255,${p.life})`;
+
     ctx.fill();
 
     if(p.life<=0){
+
       particles.splice(i,1);
     }
   }
@@ -392,10 +445,14 @@ function spawnConfetti(){
   for(let i=0;i<100;i++){
 
     confetti.push({
+
       x:Math.random()*W,
       y:-20,
+
       vy:2+Math.random()*2,
+
       size:5+Math.random()*5,
+
       color:[
         '#7abf8a',
         '#9ad4a5',
@@ -425,37 +482,49 @@ function drawConfetti(){
 
 /* FLOATING LEAF */
 
-let leafX=0;
-let leafY=0;
 let leafAngle=0;
 
 function drawLeaf(){
 
   leafAngle+=0.02;
 
-  leafX=W/2 + Math.sin(leafAngle)*80;
-  leafY=H/2 - 60 + Math.cos(leafAngle*1.4)*20;
+  const leafX=
+  W/2 + Math.sin(leafAngle)*80;
+
+  const leafY=
+  H/2 - 60 +
+  Math.cos(leafAngle*1.4)*20;
 
   ctx.save();
 
   ctx.translate(leafX,leafY);
-  ctx.rotate(Math.sin(leafAngle)*0.4);
+
+  ctx.rotate(
+    Math.sin(leafAngle)*0.4
+  );
 
   ctx.beginPath();
 
   ctx.moveTo(0,-18);
+
   ctx.quadraticCurveTo(18,0,0,18);
+
   ctx.quadraticCurveTo(-18,0,0,-18);
 
   ctx.fillStyle="#7abf8a";
+
   ctx.fill();
 
   ctx.strokeStyle="#5f9e6d";
+
   ctx.lineWidth=1.2;
 
   ctx.beginPath();
+
   ctx.moveTo(0,-16);
+
   ctx.lineTo(0,16);
+
   ctx.stroke();
 
   ctx.restore();
@@ -479,6 +548,7 @@ function createSeeds(){
     seeds.push({
 
       x:80+Math.random()*(W-160),
+
       y:120+Math.random()*(H-240),
 
       r:8,
@@ -505,9 +575,16 @@ function drawPointer(){
 
   ctx.beginPath();
 
-  ctx.arc(mouse.x,mouse.y,7,0,Math.PI*2);
+  ctx.arc(
+    mouse.x,
+    mouse.y,
+    7,
+    0,
+    Math.PI*2
+  );
 
   ctx.fillStyle="#222";
+
   ctx.fill();
 }
 
@@ -532,6 +609,7 @@ function updateSeeds(){
     );
 
     ctx.fillStyle=seed.color;
+
     ctx.fill();
 
     const dist=Math.hypot(
@@ -547,7 +625,7 @@ function updateSeeds(){
 
       awakened++;
 
-      worldLife+=2;
+      worldLife+=3;
 
       progress.style.width=
       (awakened/TOTAL)*100+'%';
@@ -591,11 +669,15 @@ function updateSeeds(){
 function restartGame(){
 
   awakened=0;
+
   worldLife=0;
+
   gameFinished=false;
 
   flowers.length=0;
+
   particles.length=0;
+
   confetti.length=0;
 
   buttons.style.display='none';
@@ -628,26 +710,23 @@ function animate(){
   drawConfetti();
 
   if(gameFinished){
+
     drawLeaf();
-  }
 
-  drawPointer();
+    ctx.textAlign='center';
 
-  ctx.textAlign='center';
-  ctx.fillStyle='#222';
-
-  if(gameFinished){
-
-    ctx.font='600 48px Poppins';
-    ctx.fillText('🍃',W/2,H/2-40);
+    ctx.fillStyle='#222';
 
     ctx.font='600 20px Poppins';
+
     ctx.fillText(
       'Getting DIGITAL Soon!',
       W/2,
       H/2+30
     );
   }
+
+  drawPointer();
 }
 
 animate();
