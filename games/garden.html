@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Restore Garden</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,8 +21,8 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#f7f7f2;
   font-family:Poppins,sans-serif;
+  background:#f7f7f5;
 }
 
 canvas{
@@ -33,11 +33,11 @@ canvas{
 #audioPrompt{
   position:fixed;
   inset:0;
-  background:rgba(255,255,255,.92);
+  background:rgba(255,255,255,.94);
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:100;
+  z-index:20;
 }
 
 #audioPrompt .box{
@@ -46,30 +46,22 @@ canvas{
   padding:28px;
   border-radius:18px;
   text-align:center;
+  width:min(90%,340px);
 }
 
 #audioPrompt p{
   margin-bottom:18px;
-  color:#444;
+  color:#333;
 }
 
 #audioPrompt button{
-  margin:0 6px;
   padding:10px 18px;
   border:none;
+  background:#222;
+  color:#fff;
   border-radius:10px;
-  background:#ececec;
   cursor:pointer;
-  font-weight:600;
-}
-
-#soundToggle{
-  position:fixed;
-  top:18px;
-  right:18px;
-  font-size:22px;
-  cursor:pointer;
-  z-index:50;
+  margin:0 6px;
 }
 
 #ui{
@@ -80,84 +72,59 @@ canvas{
 
 #title{
   position:absolute;
-  top:20px;
+  top:22px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:clamp(24px,4vw,40px);
+  font-weight:600;
+  color:#1d1d1d;
+  letter-spacing:2px;
+}
+
+#message{
+  position:absolute;
+  bottom:28px;
   width:100%;
   text-align:center;
-  font-size:clamp(22px,4vw,34px);
-  font-weight:600;
   color:#444;
+  font-size:clamp(14px,2vw,18px);
 }
 
 #progressWrap{
   position:absolute;
-  top:72px;
+  top:78px;
   left:50%;
   transform:translateX(-50%);
-  width:min(320px,70vw);
+  width:min(320px,72vw);
   height:10px;
   border-radius:999px;
   overflow:hidden;
-  background:#e8e8e8;
+  background:#dcdcdc;
 }
 
 #progress{
   width:0%;
   height:100%;
-  background:#9bc59d;
+  background:#7abf8a;
   transition:.3s;
 }
 
-#message{
+#buttons{
   position:absolute;
-  bottom:26px;
+  bottom:100px;
   width:100%;
-  text-align:center;
-  color:#666;
-  font-size:15px;
-}
-
-#endOverlay{
-  position:fixed;
-  inset:0;
   display:none;
-  pointer-events:none;
-  z-index:80;
-}
-
-#endContent{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
   justify-content:center;
-  text-align:center;
-}
-
-#endContent h1{
-  font-size:clamp(42px,8vw,78px);
-  color:#333;
-  margin-bottom:12px;
-}
-
-#endContent p{
-  color:#666;
-  margin-bottom:24px;
-}
-
-.buttons{
-  display:flex;
   gap:14px;
-  flex-wrap:wrap;
-  pointer-events:auto;
+  z-index:10;
 }
 
-.buttons button{
+#buttons button{
   border:none;
-  background:#222;
-  color:#fff;
   padding:12px 22px;
   border-radius:12px;
+  background:#1f1f1f;
+  color:#fff;
   cursor:pointer;
   font-weight:600;
 }
@@ -174,15 +141,11 @@ canvas{
   </div>
 </div>
 
-<div id="soundToggle">🔇</div>
-
 <canvas id="canvas"></canvas>
 
 <div id="ui">
 
-  <div id="title">
-    RESTORE GARDEN
-  </div>
+  <div id="title">RESTORE GARDEN</div>
 
   <div id="progressWrap">
     <div id="progress"></div>
@@ -194,28 +157,9 @@ canvas{
 
 </div>
 
-<div id="endOverlay">
-
-  <div id="endContent">
-
-    <h1>🌱</h1>
-
-    <p>Getting DIGITAL Soon!</p>
-
-    <div class="buttons">
-
-      <button onclick="restartGame()">
-        Play Again
-      </button>
-
-      <button onclick="goHome()">
-        Homepage
-      </button>
-
-    </div>
-
-  </div>
-
+<div id="buttons">
+  <button onclick="restartGame()">Play Again</button>
+  <button onclick="goHome()">Homepage</button>
 </div>
 
 <script>
@@ -229,99 +173,74 @@ function resize(){
   H=canvas.height=innerHeight;
 }
 resize();
-
 addEventListener("resize",resize);
 
-const progressBar=document.getElementById("progress");
-const message=document.getElementById("message");
-
-/* ================= AUDIO ================= */
+/* AUDIO */
 
 let audioCtx;
 let soundOn=false;
 
 function initAudio(){
-
   if(!audioCtx){
-
-    audioCtx=new (
-      window.AudioContext ||
-      webkitAudioContext
-    )();
+    audioCtx=new(window.AudioContext||webkitAudioContext)();
   }
 }
 
-function playBeep(freq=620,duration=0.08){
-
-  if(!soundOn || !audioCtx) return;
+function beep(freq=700,dur=0.08,vol=0.04){
+  if(!soundOn) return;
 
   const osc=audioCtx.createOscillator();
   const gain=audioCtx.createGain();
 
-  osc.type='sine';
+  osc.type="sine";
   osc.frequency.value=freq;
 
-  gain.gain.setValueAtTime(
-    0.06,
-    audioCtx.currentTime
-  );
-
+  gain.gain.value=vol;
   gain.gain.exponentialRampToValueAtTime(
     0.0001,
-    audioCtx.currentTime + duration
+    audioCtx.currentTime+dur
   );
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
-  osc.stop(audioCtx.currentTime + duration);
+  osc.stop(audioCtx.currentTime+dur);
 }
 
-/* ================= AUDIO PROMPT ================= */
+function celebrationChimes(){
+  if(!soundOn) return;
 
-document.getElementById("audioYes").onclick=async()=>{
+  [523,659,784,1046].forEach((f,i)=>{
+    setTimeout(()=>{
+      beep(f,0.4,0.05);
+    },i*180);
+  });
+}
 
+document.getElementById("audioYes").onclick=()=>{
   initAudio();
-
-  await audioCtx.resume();
-
+  audioCtx.resume();
   soundOn=true;
-
-  document.getElementById("soundToggle")
-  .textContent='🔊';
-
-  document.getElementById("audioPrompt")
-  .style.display='none';
+  document.getElementById("audioPrompt").style.display="none";
 };
 
 document.getElementById("audioNo").onclick=()=>{
-
   soundOn=false;
-
-  document.getElementById("soundToggle")
-  .textContent='🔇';
-
-  document.getElementById("audioPrompt")
-  .style.display='none';
+  document.getElementById("audioPrompt").style.display="none";
 };
 
-document.getElementById("soundToggle").onclick=async()=>{
+/* UI */
 
-  soundOn=!soundOn;
+const progress=document.getElementById("progress");
+const message=document.getElementById("message");
+const buttons=document.getElementById("buttons");
 
-  document.getElementById("soundToggle")
-  .textContent=soundOn?'🔊':'🔇';
+function goHome(){
+  window.location.href='../index.html';
+}
 
-  if(soundOn){
-
-    initAudio();
-
-    await audioCtx.resume();
-  }
-};
-
-/* ================= POINTER ================= */
+/* POINTER */
 
 const mouse={
   x:W/2,
@@ -340,27 +259,38 @@ addEventListener("touchmove",e=>{
   mouse.ty=e.touches[0].clientY;
 },{passive:true});
 
-/* ================= COLORS ================= */
+/* BACKGROUND */
 
-const COLORS=[
-  '#8ecae6',
-  '#90be6d',
-  '#f9c74f',
-  '#f9844a',
-  '#b8e0d2'
-];
+let worldLife=0;
 
-/* ================= FLOWERS ================= */
+function drawBackground(){
+
+  const grd=ctx.createLinearGradient(0,0,0,H);
+
+  grd.addColorStop(
+    0,
+    `rgb(${242-worldLife},248,242)`
+  );
+
+  grd.addColorStop(
+    1,
+    `rgb(${232-worldLife*.4},240,232)`
+  );
+
+  ctx.fillStyle=grd;
+  ctx.fillRect(0,0,W,H);
+}
+
+/* FLOWERS */
 
 const flowers=[];
 
 function spawnFlower(x,y,color){
 
   flowers.push({
-    x,
-    y,
+    x,y,
     r:0,
-    max:16+Math.random()*12,
+    max:20+Math.random()*10,
     petals:6,
     color
   });
@@ -383,10 +313,12 @@ function drawFlowers(){
 
       ctx.beginPath();
 
-      ctx.arc(
+      ctx.ellipse(
         px,
         py,
-        f.r*0.38,
+        f.r*.42,
+        f.r*.22,
+        angle,
         0,
         Math.PI*2
       );
@@ -397,82 +329,79 @@ function drawFlowers(){
 
     ctx.beginPath();
 
-    ctx.arc(
-      f.x,
-      f.y,
-      f.r*0.22,
-      0,
-      Math.PI*2
-    );
+    ctx.arc(f.x,f.y,f.r*.22,0,Math.PI*2);
 
-    ctx.fillStyle='#fff';
+    ctx.fillStyle="#fff";
     ctx.fill();
   });
 }
 
-/* ================= SEEDS ================= */
+/* PARTICLES */
 
-const TOTAL=20;
+const particles=[];
 
-let awakened=0;
-let finished=false;
+function spawnParticles(x,y){
 
-const seeds=[];
+  for(let i=0;i<10;i++){
 
-function createSeeds(){
-
-  seeds.length=0;
-
-  for(let i=0;i<TOTAL;i++){
-
-    seeds.push({
-
-      x:80+Math.random()*(W-160),
-
-      y:120+Math.random()*(H-220),
-
-      r:8,
-
-      pulse:Math.random()*10,
-
-      active:true,
-
-      color:COLORS[
-        Math.floor(
-          Math.random()*COLORS.length
-        )
-      ]
+    particles.push({
+      x,y,
+      vx:(Math.random()-.5)*3,
+      vy:(Math.random()-.5)*3,
+      life:1
     });
   }
 }
 
-createSeeds();
+function drawParticles(){
 
-/* ================= CONFETTI ================= */
+  for(let i=particles.length-1;i>=0;i--){
 
-let confetti=[];
+    const p=particles[i];
+
+    p.x+=p.vx;
+    p.y+=p.vy;
+
+    p.life-=0.025;
+
+    ctx.beginPath();
+
+    ctx.arc(
+      p.x,
+      p.y,
+      3*p.life,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle=`rgba(255,255,255,${p.life})`;
+    ctx.fill();
+
+    if(p.life<=0){
+      particles.splice(i,1);
+    }
+  }
+}
+
+/* CONFETTI */
+
+const confetti=[];
 
 function spawnConfetti(){
-
-  confetti=[];
 
   for(let i=0;i<100;i++){
 
     confetti.push({
-
       x:Math.random()*W,
-
       y:-20,
-
-      vy:2+Math.random()*3,
-
-      size:4+Math.random()*8,
-
-      color:COLORS[
-        Math.floor(
-          Math.random()*COLORS.length
-        )
-      ]
+      vy:2+Math.random()*2,
+      size:5+Math.random()*5,
+      color:[
+        '#7abf8a',
+        '#9ad4a5',
+        '#c8e6c9',
+        '#f6d365'
+      ][Math.floor(Math.random()*4)]
     });
   }
 }
@@ -487,64 +416,104 @@ function drawConfetti(){
       c.x,
       c.y,
       c.size,
-      c.size*1.8
+      c.size*1.6
     );
 
     c.y+=c.vy;
   });
 }
 
-/* ================= END SCREEN ================= */
+/* FLOATING LEAF */
 
-function finalScreen(){
+let leafX=0;
+let leafY=0;
+let leafAngle=0;
 
-  spawnConfetti();
+function drawLeaf(){
 
-  document.getElementById(
-    'endOverlay'
-  ).style.display='block';
+  leafAngle+=0.02;
+
+  leafX=W/2 + Math.sin(leafAngle)*80;
+  leafY=H/2 - 60 + Math.cos(leafAngle*1.4)*20;
+
+  ctx.save();
+
+  ctx.translate(leafX,leafY);
+  ctx.rotate(Math.sin(leafAngle)*0.4);
+
+  ctx.beginPath();
+
+  ctx.moveTo(0,-18);
+  ctx.quadraticCurveTo(18,0,0,18);
+  ctx.quadraticCurveTo(-18,0,0,-18);
+
+  ctx.fillStyle="#7abf8a";
+  ctx.fill();
+
+  ctx.strokeStyle="#5f9e6d";
+  ctx.lineWidth=1.2;
+
+  ctx.beginPath();
+  ctx.moveTo(0,-16);
+  ctx.lineTo(0,16);
+  ctx.stroke();
+
+  ctx.restore();
 }
 
-function restartGame(){
+/* SEEDS */
 
-  awakened=0;
+const TOTAL=20;
 
-  finished=false;
+let awakened=0;
+let gameFinished=false;
 
-  flowers.length=0;
+const seeds=[];
 
-  confetti=[];
+function createSeeds(){
 
-  progressBar.style.width='0%';
+  seeds.length=0;
 
-  message.textContent=
-  'Touch every sleeping seed to awaken the garden';
+  for(let i=0;i<TOTAL;i++){
 
-  createSeeds();
+    seeds.push({
 
-  document.getElementById(
-    'endOverlay'
-  ).style.display='none';
+      x:80+Math.random()*(W-160),
+      y:120+Math.random()*(H-240),
+
+      r:8,
+
+      pulse:Math.random()*10,
+
+      active:true,
+
+      color:[
+        '#7abf8a',
+        '#9ad4a5',
+        '#f6d365',
+        '#d4a373'
+      ][Math.floor(Math.random()*4)]
+    });
+  }
 }
 
-function goHome(){
+createSeeds();
 
-  window.location.href='../index.html';
+/* POINTER */
+
+function drawPointer(){
+
+  ctx.beginPath();
+
+  ctx.arc(mouse.x,mouse.y,7,0,Math.PI*2);
+
+  ctx.fillStyle="#222";
+  ctx.fill();
 }
 
-/* ================= LOOP ================= */
+/* GAME */
 
-function animate(){
-
-  requestAnimationFrame(animate);
-
-  mouse.x += (mouse.tx-mouse.x)*0.1;
-  mouse.y += (mouse.ty-mouse.y)*0.1;
-
-  ctx.fillStyle='#f7f7f2';
-  ctx.fillRect(0,0,W,H);
-
-  drawFlowers();
+function updateSeeds(){
 
   seeds.forEach(seed=>{
 
@@ -557,13 +526,12 @@ function animate(){
     ctx.arc(
       seed.x,
       seed.y,
-      seed.r + Math.sin(seed.pulse)*1.5,
+      seed.r+Math.sin(seed.pulse)*1.5,
       0,
       Math.PI*2
     );
 
     ctx.fillStyle=seed.color;
-
     ctx.fill();
 
     const dist=Math.hypot(
@@ -571,13 +539,18 @@ function animate(){
       mouse.y-seed.y
     );
 
-    if(dist<24){
+    if(dist<22){
+
+      beep();
 
       seed.active=false;
 
       awakened++;
 
-      playBeep();
+      worldLife+=2;
+
+      progress.style.width=
+      (awakened/TOTAL)*100+'%';
 
       spawnFlower(
         seed.x,
@@ -585,8 +558,10 @@ function animate(){
         seed.color
       );
 
-      progressBar.style.width=
-      (awakened/TOTAL)*100+'%';
+      spawnParticles(
+        seed.x,
+        seed.y
+      );
 
       if(awakened===10){
 
@@ -594,35 +569,85 @@ function animate(){
         'The garden is waking up';
       }
 
-      if(awakened===TOTAL && !finished){
+      if(awakened===TOTAL){
 
-        finished=true;
+        celebrationChimes();
 
         message.textContent=
-        'The garden is fully alive ✨';
+        'Getting DIGITAL Soon!';
 
-        setTimeout(()=>{
-          finalScreen();
-        },900);
+        spawnConfetti();
+
+        buttons.style.display='flex';
+
+        gameFinished=true;
       }
     }
   });
+}
+
+/* RESTART */
+
+function restartGame(){
+
+  awakened=0;
+  worldLife=0;
+  gameFinished=false;
+
+  flowers.length=0;
+  particles.length=0;
+  confetti.length=0;
+
+  buttons.style.display='none';
+
+  progress.style.width='0%';
+
+  message.textContent=
+  'Touch every sleeping seed to awaken the garden';
+
+  createSeeds();
+}
+
+/* LOOP */
+
+function animate(){
+
+  requestAnimationFrame(animate);
+
+  mouse.x+=(mouse.tx-mouse.x)*0.08;
+  mouse.y+=(mouse.ty-mouse.y)*0.08;
+
+  drawBackground();
+
+  drawFlowers();
+
+  updateSeeds();
+
+  drawParticles();
 
   drawConfetti();
 
-  ctx.beginPath();
+  if(gameFinished){
+    drawLeaf();
+  }
 
-  ctx.arc(
-    mouse.x,
-    mouse.y,
-    7,
-    0,
-    Math.PI*2
-  );
+  drawPointer();
 
+  ctx.textAlign='center';
   ctx.fillStyle='#222';
 
-  ctx.fill();
+  if(gameFinished){
+
+    ctx.font='600 48px Poppins';
+    ctx.fillText('🍃',W/2,H/2-40);
+
+    ctx.font='600 20px Poppins';
+    ctx.fillText(
+      'Getting DIGITAL Soon!',
+      W/2,
+      H/2+30
+    );
+  }
 }
 
 animate();
