@@ -1,6 +1,3 @@
-<!-- =========================
-garden.html
-========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +6,9 @@ garden.html
 <title>Restore Garden</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -22,8 +21,8 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
+  background:#f7f7f2;
   font-family:Poppins,sans-serif;
-  background:#f7f7f4;
 }
 
 canvas{
@@ -34,29 +33,43 @@ canvas{
 #audioPrompt{
   position:fixed;
   inset:0;
-  background:rgba(255,255,255,.94);
+  background:rgba(255,255,255,.92);
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:50;
+  z-index:100;
 }
 
-.box{
-  background:white;
+#audioPrompt .box{
+  background:#fff;
   border:1px solid #ddd;
   padding:28px;
   border-radius:18px;
   text-align:center;
 }
 
-.box button{
-  margin:10px;
+#audioPrompt p{
+  margin-bottom:18px;
+  color:#444;
+}
+
+#audioPrompt button{
+  margin:0 6px;
   padding:10px 18px;
   border:none;
-  background:#222;
-  color:white;
   border-radius:10px;
+  background:#ececec;
   cursor:pointer;
+  font-weight:600;
+}
+
+#soundToggle{
+  position:fixed;
+  top:18px;
+  right:18px;
+  font-size:22px;
+  cursor:pointer;
+  z-index:50;
 }
 
 #ui{
@@ -67,38 +80,40 @@ canvas{
 
 #title{
   position:absolute;
-  top:22px;
+  top:20px;
   width:100%;
   text-align:center;
-  font-size:clamp(20px,4vw,34px);
-  color:#2d4739;
+  font-size:clamp(22px,4vw,34px);
   font-weight:600;
-}
-
-#message{
-  position:absolute;
-  bottom:28px;
-  width:100%;
-  text-align:center;
-  color:#555;
+  color:#444;
 }
 
 #progressWrap{
   position:absolute;
-  top:76px;
+  top:72px;
   left:50%;
   transform:translateX(-50%);
   width:min(320px,70vw);
   height:10px;
-  background:#dfe8df;
   border-radius:999px;
   overflow:hidden;
+  background:#e8e8e8;
 }
 
 #progress{
   width:0%;
   height:100%;
-  background:#79b791;
+  background:#9bc59d;
+  transition:.3s;
+}
+
+#message{
+  position:absolute;
+  bottom:26px;
+  width:100%;
+  text-align:center;
+  color:#666;
+  font-size:15px;
 }
 
 #endScreen{
@@ -108,23 +123,36 @@ canvas{
   align-items:center;
   justify-content:center;
   flex-direction:column;
-  background:rgba(255,255,255,.82);
-  backdrop-filter:blur(6px);
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(8px);
+  z-index:80;
+}
+
+#endScreen h1{
+  font-size:clamp(38px,7vw,72px);
+  color:#333;
+  margin-bottom:12px;
+}
+
+#endScreen p{
+  color:#666;
+  margin-bottom:24px;
 }
 
 .buttons{
   display:flex;
-  gap:12px;
-  margin-top:24px;
+  gap:14px;
+  flex-wrap:wrap;
 }
 
 .buttons button{
-  padding:12px 20px;
   border:none;
-  border-radius:12px;
   background:#222;
-  color:white;
+  color:#fff;
+  padding:12px 22px;
+  border-radius:12px;
   cursor:pointer;
+  font-weight:600;
 }
 </style>
 </head>
@@ -133,18 +161,20 @@ canvas{
 
 <div id="audioPrompt">
   <div class="box">
-    <p>Enable sound?</p>
+    <p>Enable sound for a better experience?</p>
     <button id="audioYes">Yes</button>
     <button id="audioNo">No</button>
   </div>
 </div>
+
+<div id="soundToggle">🔇</div>
 
 <canvas id="canvas"></canvas>
 
 <div id="ui">
 
   <div id="title">
-    Restore Garden
+    RESTORE GARDEN
   </div>
 
   <div id="progressWrap">
@@ -152,22 +182,27 @@ canvas{
   </div>
 
   <div id="message">
-    Wake every sleeping seed
+    Touch every sleeping seed to awaken the garden
   </div>
 
 </div>
 
 <div id="endScreen">
 
-  <h1>🌱 Garden Restored</h1>
+  <h1>🌱</h1>
 
-  <p style="margin-top:10px;color:#555;">
-    Getting DIGITAL Soon!
-  </p>
+  <p>Getting DIGITAL Soon!</p>
 
   <div class="buttons">
-    <button onclick="restartGame()">Play Again</button>
-    <button onclick="goHome()">Homepage</button>
+
+    <button onclick="restartGame()">
+      Play Again
+    </button>
+
+    <button onclick="goHome()">
+      Homepage
+    </button>
+
   </div>
 
 </div>
@@ -183,6 +218,7 @@ function resize(){
   H=canvas.height=innerHeight;
 }
 resize();
+
 addEventListener("resize",resize);
 
 const progressBar=document.getElementById("progress");
@@ -194,8 +230,13 @@ let audioCtx;
 let soundOn=false;
 
 function initAudio(){
+
   if(!audioCtx){
-    audioCtx=new (window.AudioContext||webkitAudioContext)();
+
+    audioCtx=new (
+      window.AudioContext ||
+      webkitAudioContext
+    )();
   }
 }
 
@@ -209,7 +250,10 @@ function playBeep(freq=620,duration=0.08){
   osc.type='sine';
   osc.frequency.value=freq;
 
-  gain.gain.value=0.06;
+  gain.gain.setValueAtTime(
+    0.06,
+    audioCtx.currentTime
+  );
 
   gain.gain.exponentialRampToValueAtTime(
     0.0001,
@@ -233,26 +277,30 @@ document.getElementById("audioYes").onclick=async()=>{
 
   soundOn=true;
 
-  document.getElementById("soundToggle").textContent='🔊';
+  document.getElementById("soundToggle")
+  .textContent='🔊';
 
-  document.getElementById("audioPrompt").style.display='none';
+  document.getElementById("audioPrompt")
+  .style.display='none';
 };
 
 document.getElementById("audioNo").onclick=()=>{
 
   soundOn=false;
 
-  document.getElementById("soundToggle").textContent='🔇';
+  document.getElementById("soundToggle")
+  .textContent='🔇';
 
-  document.getElementById("audioPrompt").style.display='none';
+  document.getElementById("audioPrompt")
+  .style.display='none';
 };
 
 document.getElementById("soundToggle").onclick=async()=>{
 
   soundOn=!soundOn;
 
-  document.getElementById("soundToggle").textContent=
-  soundOn ? '🔊' : '🔇';
+  document.getElementById("soundToggle")
+  .textContent=soundOn?'🔊':'🔇';
 
   if(soundOn){
 
@@ -356,6 +404,7 @@ function drawFlowers(){
 const TOTAL=20;
 
 let awakened=0;
+let finished=false;
 
 const seeds=[];
 
@@ -436,8 +485,6 @@ function drawConfetti(){
 
 /* ================= END SCREEN ================= */
 
-let finished=false;
-
 function finalScreen(){
 
   spawnConfetti();
@@ -470,6 +517,7 @@ function restartGame(){
 }
 
 function goHome(){
+
   window.location.href='../index.html';
 }
 
@@ -529,6 +577,12 @@ function animate(){
       progressBar.style.width=
       (awakened/TOTAL)*100+'%';
 
+      if(awakened===10){
+
+        message.textContent=
+        'The garden is waking up';
+      }
+
       if(awakened===TOTAL && !finished){
 
         finished=true;
@@ -556,6 +610,7 @@ function animate(){
   );
 
   ctx.fillStyle='#222';
+
   ctx.fill();
 }
 
