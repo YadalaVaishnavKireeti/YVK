@@ -19,8 +19,6 @@ html,body{
 
 body{
   background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1400&auto=format&fit=crop') center/cover no-repeat;
-  background-size:cover;
-  background-position:center;
 }
 
 canvas{
@@ -35,7 +33,7 @@ canvas{
   transform:translateX(-50%);
   width:min(320px,70vw);
   height:10px;
-  background:rgba(255,255,255,.25);
+  background:rgba(255,255,255,.2);
   border-radius:999px;
   overflow:hidden;
   z-index:5;
@@ -45,7 +43,6 @@ canvas{
   width:0%;
   height:100%;
   background:#fff;
-  transition:.15s linear;
 }
 
 #hint{
@@ -54,56 +51,49 @@ canvas{
   width:100%;
   text-align:center;
   color:#fff;
-  font-size:15px;
-  z-index:5;
+  font-size:18px;
 }
 
 #endScreen{
   position:fixed;
   inset:0;
   display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,255,255,.15);
-  backdrop-filter:blur(6px);
-  z-index:20;
+  z-index:50;
 }
 
-.endCard{
+#endCanvas{
+  position:absolute;
+  inset:0;
+}
+
+#endContent{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
   text-align:center;
   color:#fff;
 }
 
-.endCard h1{
-  font-size:clamp(46px,8vw,82px);
-  margin:0;
-}
-
-.endCard p{
-  margin-top:12px;
-  opacity:.9;
+#endContent h1{
+  font-size:clamp(44px,7vw,82px);
 }
 
 .buttons{
-  margin-top:28px;
+  margin-top:26px;
   display:flex;
-  justify-content:center;
   gap:14px;
   flex-wrap:wrap;
 }
 
 .buttons button{
+  padding:12px 24px;
   border:none;
-  padding:12px 22px;
   border-radius:12px;
   cursor:pointer;
   font-weight:600;
-}
-
-#confettiCanvas{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
 }
 </style>
 </head>
@@ -115,16 +105,16 @@ canvas{
 </div>
 
 <div id="hint">
-  Clear every bit of fog
+  Clean the fog slowly
 </div>
 
 <canvas id="canvas"></canvas>
 
 <div id="endScreen">
 
-  <canvas id="confettiCanvas"></canvas>
+  <canvas id="endCanvas"></canvas>
 
-  <div class="endCard">
+  <div id="endContent">
 
     <h1>☀ CLEAR</h1>
 
@@ -141,10 +131,10 @@ canvas{
 
 <script>
 const canvas=document.getElementById('canvas');
-const ctx=canvas.getContext('2d',{willReadFrequently:true});
+const ctx=canvas.getContext('2d');
 
-const confettiCanvas=document.getElementById('confettiCanvas');
-const confettiCtx=confettiCanvas.getContext('2d');
+const endCanvas=document.getElementById('endCanvas');
+const endCtx=endCanvas.getContext('2d');
 
 const progress=document.getElementById('progress');
 
@@ -152,11 +142,8 @@ let W,H;
 
 function resize(){
 
-  W=canvas.width=innerWidth;
-  H=canvas.height=innerHeight;
-
-  confettiCanvas.width=W;
-  confettiCanvas.height=H;
+  W=canvas.width=endCanvas.width=innerWidth;
+  H=canvas.height=endCanvas.height=innerHeight;
 
   drawFog();
 }
@@ -165,23 +152,15 @@ resize();
 
 addEventListener('resize',resize);
 
-/* =========================
-   FOG
-========================= */
-
 function drawFog(){
-
-  ctx.clearRect(0,0,W,H);
 
   ctx.fillStyle='rgba(220,230,235,.97)';
   ctx.fillRect(0,0,W,H);
 }
 
-let finished=false;
+let cleanedMap=new Set();
 
-/* =========================
-   ERASE
-========================= */
+let finished=false;
 
 function clearFog(x,y){
 
@@ -202,12 +181,35 @@ function clearFog(x,y){
   ctx.fillStyle=g;
 
   ctx.beginPath();
+
   ctx.arc(x,y,80,0,Math.PI*2);
+
   ctx.fill();
 
   ctx.restore();
 
-  checkProgress();
+  const gx=Math.floor(x/20);
+  const gy=Math.floor(y/20);
+
+  const key=`${gx}-${gy}`;
+
+  if(!cleanedMap.has(key)){
+
+    cleanedMap.add(key);
+
+    const percent=
+    (cleanedMap.size/420)*100;
+
+    progress.style.width=
+    Math.min(percent,100)+'%';
+
+    if(cleanedMap.size>=420){
+
+      finished=true;
+
+      finalScreen();
+    }
+  }
 }
 
 canvas.addEventListener('mousemove',e=>{
@@ -220,43 +222,6 @@ canvas.addEventListener('touchmove',e=>{
     e.touches[0].clientY
   );
 },{passive:true});
-
-/* =========================
-   REAL PROGRESS CHECK
-========================= */
-
-function checkProgress(){
-
-  const imageData=
-  ctx.getImageData(0,0,W,H).data;
-
-  let transparent=0;
-
-  for(let i=3;i<imageData.length;i+=80){
-
-    if(imageData[i] < 20){
-      transparent++;
-    }
-  }
-
-  const total=imageData.length/80;
-
-  const percent=(transparent/total)*100;
-
-  progress.style.width=
-  Math.min(percent,100)+'%';
-
-  if(percent > 99.4){
-
-    finished=true;
-
-    finalScreen();
-  }
-}
-
-/* =========================
-   CONFETTI
-========================= */
 
 let confetti=[];
 
@@ -279,8 +244,6 @@ function spawnConfetti(){
 
       vy:2+Math.random()*3,
 
-      size:4+Math.random()*6,
-
       c:colors[
         Math.floor(
           Math.random()*colors.length
@@ -290,52 +253,41 @@ function spawnConfetti(){
   }
 }
 
-function drawConfetti(){
-
-  confettiCtx.clearRect(0,0,W,H);
-
-  confetti.forEach(c=>{
-
-    confettiCtx.fillStyle=c.c;
-
-    confettiCtx.fillRect(
-      c.x,
-      c.y,
-      c.size,
-      c.size*1.8
-    );
-
-    c.y+=c.vy;
-
-    if(c.y>H+20){
-      c.y=-20;
-    }
-  });
-
-  requestAnimationFrame(drawConfetti);
-}
-
-/* =========================
-   FINAL
-========================= */
-
 function finalScreen(){
-
-  document.getElementById('endScreen')
-  .style.display='flex';
 
   spawnConfetti();
 
-  drawConfetti();
-}
+  document.getElementById('endScreen')
+  .style.display='block';
 
-/* =========================
-   RESTART
-========================= */
+  function loop(){
+
+    endCtx.clearRect(0,0,W,H);
+
+    confetti.forEach(c=>{
+
+      endCtx.fillStyle=c.c;
+
+      endCtx.fillRect(c.x,c.y,6,12);
+
+      c.y+=c.vy;
+
+      if(c.y>H+20){
+        c.y=-20;
+      }
+    });
+
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+}
 
 function restartGame(){
 
   finished=false;
+
+  cleanedMap.clear();
 
   progress.style.width='0%';
 
@@ -345,12 +297,7 @@ function restartGame(){
   drawFog();
 }
 
-/* =========================
-   HOME
-========================= */
-
 function goHome(){
-
   window.location.href='../index.html';
 }
 </script>
