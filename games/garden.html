@@ -116,25 +116,31 @@ canvas{
   font-size:15px;
 }
 
-#endScreen{
+#endOverlay{
   position:fixed;
   inset:0;
   display:none;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  background:rgba(255,255,255,.78);
-  backdrop-filter:blur(8px);
+  pointer-events:none;
   z-index:80;
 }
 
-#endScreen h1{
-  font-size:clamp(38px,7vw,72px);
+#endContent{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+#endContent h1{
+  font-size:clamp(42px,8vw,78px);
   color:#333;
   margin-bottom:12px;
 }
 
-#endScreen p{
+#endContent p{
   color:#666;
   margin-bottom:24px;
 }
@@ -143,6 +149,7 @@ canvas{
   display:flex;
   gap:14px;
   flex-wrap:wrap;
+  pointer-events:auto;
 }
 
 .buttons button{
@@ -187,21 +194,25 @@ canvas{
 
 </div>
 
-<div id="endScreen">
+<div id="endOverlay">
 
-  <h1>🌱</h1>
+  <div id="endContent">
 
-  <p>Getting DIGITAL Soon!</p>
+    <h1>🌱</h1>
 
-  <div class="buttons">
+    <p>Getting DIGITAL Soon!</p>
 
-    <button onclick="restartGame()">
-      Play Again
-    </button>
+    <div class="buttons">
 
-    <button onclick="goHome()">
-      Homepage
-    </button>
+      <button onclick="restartGame()">
+        Play Again
+      </button>
+
+      <button onclick="goHome()">
+        Homepage
+      </button>
+
+    </div>
 
   </div>
 
@@ -490,8 +501,8 @@ function finalScreen(){
   spawnConfetti();
 
   document.getElementById(
-    'endScreen'
-  ).style.display='flex';
+    'endOverlay'
+  ).style.display='block';
 }
 
 function restartGame(){
@@ -512,7 +523,7 @@ function restartGame(){
   createSeeds();
 
   document.getElementById(
-    'endScreen'
+    'endOverlay'
   ).style.display='none';
 }
 
