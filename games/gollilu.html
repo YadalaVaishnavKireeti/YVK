@@ -1,31 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Responsive Brainvita</title>
+<title>Advanced Brainvita</title>
 
 <style>
 
 :root{
 
-    --board-size:min(92vw, 92vh, 700px);
-
+    --board-size:min(92vw, 92vh, 760px);
     --cell-size:11%;
-
     --peg-size:72%;
 
 }
 
 *{
     box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
 }
 
 body{
 
     margin:0;
-
     min-height:100vh;
 
     display:flex;
@@ -34,7 +32,7 @@ body{
 
     background:
         radial-gradient(circle at top,
-        #f6e7c8,
+        #f7e7ca,
         #b47b47);
 
     font-family:Arial,sans-serif;
@@ -52,29 +50,34 @@ body{
 
     width:100%;
 
+    padding:1rem;
+
 }
 
 h1{
 
     margin:0;
 
-    color:#4e2d13;
+    color:#4b2e15;
+
+    font-size:clamp(2rem,4vw,3.5rem);
 
     letter-spacing:2px;
 
-    font-size:clamp(1.8rem,4vw,3rem);
-
 }
 
-#status{
+.top-bar{
 
-    color:#4e2d13;
+    display:flex;
+    gap:1rem;
+    flex-wrap:wrap;
+    justify-content:center;
 
-    font-size:clamp(1rem,2vw,1.4rem);
+    color:#4b2e15;
 
     font-weight:bold;
 
-    min-height:30px;
+    font-size:clamp(0.9rem,2vw,1.2rem);
 
 }
 
@@ -90,16 +93,20 @@ h1{
 
     background:
         radial-gradient(circle at 30% 30%,
-        #d7a567,
-        #8a572b 70%);
+        #d8aa6d,
+        #8a572b 72%);
 
     box-shadow:
         inset 0 0 50px rgba(0,0,0,0.45),
-        0 20px 40px rgba(0,0,0,0.3);
+        0 30px 40px rgba(0,0,0,0.35);
+
+    transform:
+        perspective(1200px)
+        rotateX(18deg);
 
 }
 
-/* HOLE */
+/* HOLES */
 
 .hole{
 
@@ -115,11 +122,10 @@ h1{
     background:
         radial-gradient(circle at 30% 30%,
         #4b2c14,
-        #1a0d06);
+        #140904);
 
     box-shadow:
-        inset 0 4px 10px rgba(0,0,0,0.9),
-        0 1px 2px rgba(255,255,255,0.1);
+        inset 0 5px 10px rgba(0,0,0,0.9);
 
 }
 
@@ -135,21 +141,24 @@ h1{
     left:50%;
     top:50%;
 
-    transform:translate(-50%,-50%);
-
     border-radius:50%;
 
-    cursor:pointer;
+    transform:
+        translate(-50%,-50%);
+
+    cursor:grab;
+
+    touch-action:none;
 
     background:
         radial-gradient(circle at 30% 30%,
         #ff6b6b,
-        #a30000);
+        #980000);
 
     box-shadow:
-        inset -3px -3px 5px rgba(0,0,0,0.35),
+        inset -3px -3px 6px rgba(0,0,0,0.4),
         inset 2px 2px 5px rgba(255,255,255,0.3),
-        0 4px 10px rgba(0,0,0,0.4);
+        0 5px 12px rgba(0,0,0,0.4);
 
     transition:
         transform 0.2s,
@@ -164,8 +173,6 @@ h1{
         scale(1.1);
 
 }
-
-/* SELECTED */
 
 .selected{
 
@@ -187,29 +194,75 @@ h1{
 @keyframes pulse{
 
     0%{
-        box-shadow:
-            0 0 0px yellow;
+        box-shadow:0 0 0px yellow;
     }
 
     50%{
-        box-shadow:
-            0 0 25px yellow;
+        box-shadow:0 0 25px yellow;
     }
 
     100%{
-        box-shadow:
-            0 0 0px yellow;
+        box-shadow:0 0 0px yellow;
     }
 
 }
 
-/* BUTTON */
+/* WIN */
+
+.win{
+
+    animation:winGlow 1s infinite;
+
+}
+
+@keyframes winGlow{
+
+    0%{
+        filter:drop-shadow(0 0 0px gold);
+    }
+
+    50%{
+        filter:drop-shadow(0 0 20px gold);
+    }
+
+    100%{
+        filter:drop-shadow(0 0 0px gold);
+    }
+
+}
+
+/* LOSE */
+
+.lose{
+
+    animation:shake 0.5s infinite;
+
+}
+
+@keyframes shake{
+
+    0%{transform:translateX(0);}
+    25%{transform:translateX(-4px);}
+    50%{transform:translateX(4px);}
+    75%{transform:translateX(-4px);}
+    100%{transform:translateX(0);}
+
+}
+
+.controls{
+
+    display:flex;
+    gap:1rem;
+    flex-wrap:wrap;
+    justify-content:center;
+
+}
 
 button{
 
     border:none;
 
-    padding:0.9rem 1.5rem;
+    padding:0.9rem 1.4rem;
 
     border-radius:12px;
 
@@ -231,6 +284,20 @@ button:hover{
 
 }
 
+.status{
+
+    color:#4b2e15;
+
+    font-size:clamp(1rem,2vw,1.4rem);
+
+    font-weight:bold;
+
+    min-height:30px;
+
+    text-align:center;
+
+}
+
 </style>
 </head>
 
@@ -240,18 +307,32 @@ button:hover{
 
     <h1>Brainvita</h1>
 
-    <div id="status"></div>
+    <div class="top-bar">
+
+        <div>Moves: <span id="moves">0</span></div>
+
+        <div>Time: <span id="timer">00:00</span></div>
+
+    </div>
 
     <div class="board" id="board"></div>
 
-    <button onclick="resetGame()">Restart</button>
+    <div class="controls">
+
+        <button onclick="undoMove()">Undo</button>
+
+        <button onclick="resetGame()">Restart</button>
+
+    </div>
+
+    <div class="status" id="status"></div>
 
 </div>
 
 <script>
 
 /* =========================
-   GAME CONFIG
+   GAME DATA
 ========================= */
 
 const layout = [
@@ -270,12 +351,60 @@ let board = structuredClone(layout);
 
 let selected = null;
 
-const boardElement = document.getElementById("board");
+let moveCount = 0;
 
-const statusElement = document.getElementById("status");
+let history = [];
+
+const boardElement =
+    document.getElementById("board");
+
+const statusElement =
+    document.getElementById("status");
+
+const movesElement =
+    document.getElementById("moves");
+
+const timerElement =
+    document.getElementById("timer");
 
 /* =========================
-   TRUE CIRCULAR POSITIONING
+   TIMER
+========================= */
+
+let seconds = 0;
+
+setInterval(() => {
+
+    seconds++;
+
+    const mins =
+        String(Math.floor(seconds / 60))
+        .padStart(2,"0");
+
+    const secs =
+        String(seconds % 60)
+        .padStart(2,"0");
+
+    timerElement.innerHTML =
+        `${mins}:${secs}`;
+
+},1000);
+
+/* =========================
+   SOUNDS
+========================= */
+
+const moveSound =
+    new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+
+const winSound =
+    new Audio("https://actions.google.com/sounds/v1/cartoon/concussive_hit_guitar_boing.ogg");
+
+const loseSound =
+    new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
+
+/* =========================
+   POSITIONS
 ========================= */
 
 const coords = [];
@@ -314,12 +443,16 @@ function drawBoard(){
 
             if(board[r][c] === -1) continue;
 
-            const hole = document.createElement("div");
+            const hole =
+                document.createElement("div");
 
             hole.className = "hole";
 
-            hole.style.left = coords[r][c].x + "%";
-            hole.style.top  = coords[r][c].y + "%";
+            hole.style.left =
+                coords[r][c].x + "%";
+
+            hole.style.top =
+                coords[r][c].y + "%";
 
             const validMoves =
                 selected
@@ -330,13 +463,12 @@ function drawBoard(){
 
                 hole.classList.add("valid");
 
-                hole.onclick = () => movePeg(r,c);
-
             }
 
             if(board[r][c] === 1){
 
-                const peg = document.createElement("div");
+                const peg =
+                    document.createElement("div");
 
                 peg.className = "peg";
 
@@ -356,12 +488,18 @@ function drawBoard(){
 
                 };
 
+                enableDrag(peg,r,c);
+
                 hole.appendChild(peg);
             }
+
+            hole.onclick = () => movePeg(r,c);
 
             boardElement.appendChild(hole);
         }
     }
+
+    movesElement.innerHTML = moveCount;
 
 }
 
@@ -446,6 +584,20 @@ function movePeg(r,c){
     const sr = selected.r;
     const sc = selected.c;
 
+    const valid =
+        getPossibleMoves(sr,sc)
+        .some(m => m.r === r && m.c === c);
+
+    if(!valid) return;
+
+    history.push({
+
+        board:structuredClone(board),
+
+        moveCount
+
+    });
+
     const dr = r - sr;
     const dc = c - sc;
 
@@ -456,6 +608,10 @@ function movePeg(r,c){
     board[mr][mc] = 0;
     board[r][c] = 1;
 
+    moveCount++;
+
+    moveSound.play();
+
     selected = null;
 
     drawBoard();
@@ -465,7 +621,31 @@ function movePeg(r,c){
 }
 
 /* =========================
-   CHECK GAME STATE
+   UNDO
+========================= */
+
+function undoMove(){
+
+    if(!history.length) return;
+
+    const previous =
+        history.pop();
+
+    board = previous.board;
+
+    moveCount =
+        previous.moveCount;
+
+    selected = null;
+
+    drawBoard();
+
+    statusElement.innerHTML = "";
+
+}
+
+/* =========================
+   CHECK GAME
 ========================= */
 
 function checkGame(){
@@ -495,7 +675,11 @@ function checkGame(){
     if(pegs === 1){
 
         statusElement.innerHTML =
-            "🎉 You solved Brainvita!";
+            "🎉 YOU WIN!";
+
+        boardElement.classList.add("win");
+
+        winSound.play();
 
         return;
     }
@@ -503,7 +687,11 @@ function checkGame(){
     if(!movesLeft){
 
         statusElement.innerHTML =
-            "❌ No more valid moves!";
+            "❌ NO MOVES LEFT";
+
+        boardElement.classList.add("lose");
+
+        loseSound.play();
 
         return;
     }
@@ -519,15 +707,89 @@ function checkGame(){
 
 function resetGame(){
 
-    board = structuredClone(layout);
+    board =
+        structuredClone(layout);
 
     selected = null;
+
+    moveCount = 0;
+
+    history = [];
+
+    seconds = 0;
+
+    boardElement.classList.remove("win");
+    boardElement.classList.remove("lose");
 
     drawBoard();
 
     checkGame();
 
 }
+
+/* =========================
+   DRAG & TOUCH SUPPORT
+========================= */
+
+function enableDrag(peg,r,c){
+
+    peg.draggable = true;
+
+    peg.addEventListener("dragstart", () => {
+
+        selected = {r,c};
+
+    });
+
+    peg.addEventListener("touchstart", () => {
+
+        selected = {r,c};
+
+    });
+
+}
+
+boardElement.addEventListener("dragover", e => {
+
+    e.preventDefault();
+
+});
+
+boardElement.addEventListener("drop", e => {
+
+    const rect =
+        boardElement.getBoundingClientRect();
+
+    const x =
+        ((e.clientX - rect.left) / rect.width) * 100;
+
+    const y =
+        ((e.clientY - rect.top) / rect.height) * 100;
+
+    for(let r=0;r<7;r++){
+
+        for(let c=0;c<7;c++){
+
+            if(board[r][c] === -1) continue;
+
+            const dx =
+                x - coords[r][c].x;
+
+            const dy =
+                y - coords[r][c].y;
+
+            const dist =
+                Math.sqrt(dx*dx + dy*dy);
+
+            if(dist < 6){
+
+                movePeg(r,c);
+
+            }
+        }
+    }
+
+});
 
 /* =========================
    START
