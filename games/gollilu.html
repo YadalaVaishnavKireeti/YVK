@@ -3,70 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brainvita Game</title>
+<title>Brainvita Circular Board</title>
 
 <style>
     body {
+        margin: 0;
+        background: #d9c29c;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
         font-family: Arial, sans-serif;
-        background: #f4f4f4;
+    }
+
+    .game-container {
         text-align: center;
     }
 
     h1 {
-        margin-top: 20px;
+        color: #4b2e15;
+        margin-bottom: 20px;
     }
 
+    /* Circular wooden board */
     #board {
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #c89b5d, #8b5a2b);
         display: grid;
-        grid-template-columns: repeat(7, 60px);
-        grid-template-rows: repeat(7, 60px);
-        gap: 5px;
-        justify-content: center;
-        margin-top: 30px;
+        grid-template-columns: repeat(7, 1fr);
+        grid-template-rows: repeat(7, 1fr);
+        gap: 8px;
+        padding: 35px;
+        box-sizing: border-box;
+        box-shadow:
+            inset 0 0 25px rgba(0,0,0,0.4),
+            0 10px 30px rgba(0,0,0,0.3);
     }
 
     .cell {
-        width: 60px;
-        height: 60px;
-        border-radius: 10px;
-        background: #ddd;
         display: flex;
-        align-items: center;
         justify-content: center;
+        align-items: center;
     }
 
+    /* Hidden corner cells */
     .invalid {
-        background: transparent;
+        visibility: hidden;
     }
 
-    .peg {
-        width: 40px;
-        height: 40px;
+    /* Board holes */
+    .hole {
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
-        background: #0077ff;
+        background: radial-gradient(circle at 30% 30%, #4a2c12, #1e1005);
+        box-shadow:
+            inset 0 4px 8px rgba(0,0,0,0.6),
+            0 1px 2px rgba(255,255,255,0.2);
+        position: relative;
+    }
+
+    /* Pegs */
+    .peg {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #ff5252, #b30000);
+        position: absolute;
+        top: 5px;
+        left: 5px;
         cursor: pointer;
+        transition: transform 0.15s;
+        box-shadow:
+            inset -3px -3px 5px rgba(0,0,0,0.3),
+            inset 2px 2px 4px rgba(255,255,255,0.4),
+            0 3px 6px rgba(0,0,0,0.4);
+    }
+
+    .peg:hover {
+        transform: scale(1.1);
     }
 
     .selected {
-        background: orange !important;
+        background: radial-gradient(circle at 30% 30%, #ffd54f, #ff9800);
     }
 
     button {
         margin-top: 20px;
         padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        background: #5d4037;
+        color: white;
         font-size: 16px;
         cursor: pointer;
+    }
+
+    button:hover {
+        background: #3e2723;
     }
 </style>
 </head>
 
 <body>
 
-<h1>Brainvita Game</h1>
+<div class="game-container">
+    <h1>Brainvita</h1>
 
-<div id="board"></div>
+    <div id="board"></div>
 
-<button onclick="resetGame()">Restart</button>
+    <button onclick="resetGame()">Restart Game</button>
+</div>
 
 <script>
 const boardElement = document.getElementById("board");
@@ -96,23 +145,33 @@ function drawBoard() {
 
             if (board[r][c] === -1) {
                 cell.classList.add("invalid");
-            }
+            } else {
 
-            if (board[r][c] === 1) {
-                const peg = document.createElement("div");
-                peg.classList.add("peg");
+                const hole = document.createElement("div");
+                hole.classList.add("hole");
 
-                if (selected && selected.r === r && selected.c === c) {
-                    peg.classList.add("selected");
+                if (board[r][c] === 1) {
+
+                    const peg = document.createElement("div");
+                    peg.classList.add("peg");
+
+                    if (
+                        selected &&
+                        selected.r === r &&
+                        selected.c === c
+                    ) {
+                        peg.classList.add("selected");
+                    }
+
+                    peg.onclick = () => selectPeg(r, c);
+
+                    hole.appendChild(peg);
+
+                } else {
+                    hole.onclick = () => movePeg(r, c);
                 }
 
-                peg.onclick = () => selectPeg(r, c);
-
-                cell.appendChild(peg);
-            }
-
-            if (board[r][c] === 0) {
-                cell.onclick = () => movePeg(r, c);
+                cell.appendChild(hole);
             }
 
             boardElement.appendChild(cell);
@@ -126,6 +185,7 @@ function selectPeg(r, c) {
 }
 
 function movePeg(r, c) {
+
     if (!selected) return;
 
     const sr = selected.r;
@@ -134,32 +194,31 @@ function movePeg(r, c) {
     const dr = r - sr;
     const dc = c - sc;
 
-    // valid move = jump 2 spaces
-    if (
+    const validMove =
         (Math.abs(dr) === 2 && dc === 0) ||
-        (Math.abs(dc) === 2 && dr === 0)
-    ) {
+        (Math.abs(dc) === 2 && dr === 0);
 
-        const mr = sr + dr / 2;
-        const mc = sc + dc / 2;
+    if (!validMove) return;
 
-        // middle must contain peg
-        if (board[mr][mc] === 1 && board[r][c] === 0) {
+    const mr = sr + dr / 2;
+    const mc = sc + dc / 2;
 
-            board[sr][sc] = 0;
-            board[mr][mc] = 0;
-            board[r][c] = 1;
+    if (board[mr][mc] === 1 && board[r][c] === 0) {
 
-            selected = null;
+        board[sr][sc] = 0;
+        board[mr][mc] = 0;
+        board[r][c] = 1;
 
-            drawBoard();
+        selected = null;
 
-            checkWin();
-        }
+        drawBoard();
+
+        checkWin();
     }
 }
 
 function checkWin() {
+
     let pegs = 0;
 
     for (let row of board) {
