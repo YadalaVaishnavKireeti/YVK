@@ -11,11 +11,11 @@ content="width=device-width, initial-scale=1.0">
 
 :root{
 
-    --board-size:min(92vw,92vh,720px);
+    --board-size:min(88vmin, 820px);
 
-    --hole-size:8.5%;
+    --hole-size:7.4%;
 
-    --marble-size:72%;
+    --marble-size:74%;
 
 }
 
@@ -110,25 +110,41 @@ body{
 
     border-radius:50%;
 
+    overflow:hidden;
+
     background:
 
-        radial-gradient(circle at 35% 30%,
+        radial-gradient(circle at 30% 28%,
 
-        #d9a66a 0%,
-        #b87a45 42%,
-        #8d5528 72%,
-        #5f3417 100%);
+        #e0b277 0%,
+        #c58a52 22%,
+        #a66836 45%,
+        #7c4723 72%,
+        #4a2612 100%);
 
     box-shadow:
 
-        inset 0 0 10px rgba(255,255,255,0.25),
+        inset 0 4px 10px rgba(255,255,255,0.25),
 
-        inset 0 0 70px rgba(0,0,0,0.45),
+        inset 0 -25px 50px rgba(0,0,0,0.45),
 
-        0 25px 50px rgba(0,0,0,0.35);
+        inset 25px 25px 45px rgba(255,255,255,0.08),
+
+        inset -30px -30px 50px rgba(0,0,0,0.32),
+
+        0 45px 60px rgba(0,0,0,0.38),
+
+        0 12px 18px rgba(0,0,0,0.25);
+
+    transform:
+
+        perspective(1400px)
+
+        rotateX(14deg)
+
+        rotateZ(-1deg);
 
 }
-
 /* wood grains */
 
 .board::before{
@@ -147,15 +163,20 @@ body{
 
         circle at center,
 
-        rgba(255,255,255,0.03) 0px,
-        rgba(255,255,255,0.03) 2px,
+        rgba(255,255,255,0.035) 0px,
+        rgba(255,255,255,0.035) 2px,
 
-        transparent 3px,
-        transparent 8px
+        rgba(0,0,0,0.02) 3px,
+        rgba(0,0,0,0.02) 5px,
+
+        transparent 7px,
+        transparent 11px
 
         );
 
-    opacity:0.6;
+    mix-blend-mode:overlay;
+
+    opacity:0.9;
 
     pointer-events:none;
 
@@ -180,15 +201,17 @@ body{
 
         radial-gradient(circle at 35% 30%,
 
-        #3c2110 0%,
-        #1c0e06 70%,
+        #3d2111 0%,
+        #1a0c05 60%,
         #000 100%);
 
     box-shadow:
 
-        inset 0 5px 10px rgba(0,0,0,0.9),
+        inset 0 8px 12px rgba(0,0,0,0.92),
 
-        inset 0 -2px 3px rgba(255,255,255,0.08);
+        inset 0 -2px 2px rgba(255,255,255,0.06),
+
+        0 1px 1px rgba(255,255,255,0.05);
 
 }
 
@@ -214,27 +237,61 @@ body{
 
     touch-action:none;
 
+    overflow:hidden;
+
     background:
 
-        radial-gradient(circle at 30% 28%,
+        radial-gradient(circle at 30% 25%,
 
         #ffffff 0%,
-        #ff8d8d 15%,
-        #d10000 55%,
-        #740000 100%);
+        #ffdede 10%,
+        #ff5b5b 22%,
+        #d40000 55%,
+        #740000 82%,
+        #2b0000 100%);
 
     box-shadow:
 
-        inset -4px -6px 10px rgba(0,0,0,0.4),
+        inset -6px -8px 12px rgba(0,0,0,0.42),
 
-        inset 3px 3px 8px rgba(255,255,255,0.65),
+        inset 5px 5px 12px rgba(255,255,255,0.72),
 
-        0 5px 12px rgba(0,0,0,0.45);
+        0 8px 14px rgba(0,0,0,0.42),
+
+        0 0 8px rgba(255,120,120,0.22);
 
     transition:
 
-        transform 0.18s ease,
-        box-shadow 0.18s ease;
+        transform 0.16s ease,
+        box-shadow 0.16s ease;
+
+}
+
+.marble::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:38%;
+    height:38%;
+
+    top:12%;
+    left:16%;
+
+    border-radius:50%;
+
+    background:
+
+        radial-gradient(circle,
+
+        rgba(255,255,255,0.95) 0%,
+
+        rgba(255,255,255,0.45) 40%,
+
+        transparent 75%);
+
+    filter:blur(1px);
 
 }
 
@@ -251,15 +308,16 @@ body{
 
     background:
 
-        radial-gradient(circle at 30% 28%,
+        radial-gradient(circle at 30% 25%,
 
         #fff 0%,
-        #ffe082 15%,
+        #fff1b8 10%,
+        #ffd54f 22%,
         #ff9800 55%,
-        #b85c00 100%);
+        #b85c00 82%,
+        #5c2600 100%);
 
 }
-
 /* =========================
    VALID MOVES
 ========================= */
@@ -441,8 +499,6 @@ let moves = 0;
 
 let history = [];
 
-let seconds = 0;
-
 /* =========================
    ELEMENTS
 ========================= */
@@ -463,22 +519,42 @@ document.getElementById("status");
    TIMER
 ========================= */
 
-setInterval(()=>{
+let seconds = 0;
 
-    seconds++;
+let timerStarted = false;
 
-    const m =
-    String(Math.floor(seconds/60))
-    .padStart(2,"0");
+let timerInterval = null;
 
-    const s =
-    String(seconds%60)
-    .padStart(2,"0");
+function startTimer(){
 
-    timerEl.innerHTML =
-    `${m}:${s}`;
+    if(timerStarted) return;
 
-},1000);
+    timerStarted = true;
+
+    timerInterval = setInterval(()=>{
+
+        seconds++;
+
+        const m =
+        String(Math.floor(seconds/60))
+        .padStart(2,"0");
+
+        const s =
+        String(seconds%60)
+        .padStart(2,"0");
+
+        timerEl.innerHTML =
+        `${m}:${s}`;
+
+    },1000);
+
+}
+
+function stopTimer(){
+
+    clearInterval(timerInterval);
+
+}
 
 /* =========================
    SOUNDS
@@ -704,7 +780,7 @@ function movePeg(r,c){
     );
 
     if(!valid) return;
-
+    startTimer();
     history.push({
 
         board:
@@ -768,25 +844,29 @@ function checkGame(){
         }
     }
 
-    if(pegs===1){
+  if(pegs===1){
 
-        statusEl.innerHTML =
-        "🎉 You Win!";
+    stopTimer();
 
-        winSound.play();
+    statusEl.innerHTML =
+    "🎉 You Win!";
 
-        return;
+    winSound.play();
 
-    }
+    return;
+
+}
 
     if(!possible){
 
-        statusEl.innerHTML =
-        "❌ No Moves Left";
+    stopTimer();
 
-        return;
+    statusEl.innerHTML =
+    "❌ No Moves Left";
 
-    }
+    return;
+
+}
 
     statusEl.innerHTML =
     `Pegs Remaining: ${pegs}`;
@@ -833,6 +913,11 @@ function resetGame(){
     moves = 0;
 
     seconds = 0;
+    clearInterval(timerInterval);
+
+timerStarted = false;
+
+timerEl.innerHTML = "00:00";
 
     drawBoard();
 
