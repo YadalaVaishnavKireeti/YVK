@@ -1,89 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Brainvita</title>
+<title>Responsive Brainvita</title>
 
 <style>
 
+:root{
+
+    --board-size:min(92vw, 92vh, 700px);
+
+    --cell-size:11%;
+
+    --peg-size:72%;
+
+}
+
+*{
+    box-sizing:border-box;
+}
+
 body{
+
     margin:0;
-    height:100vh;
+
+    min-height:100vh;
+
     display:flex;
     justify-content:center;
     align-items:center;
+
     background:
-        radial-gradient(circle at top,#f4e4c1,#b78652);
-    font-family:Arial,Helvetica,sans-serif;
+        radial-gradient(circle at top,
+        #f6e7c8,
+        #b47b47);
+
+    font-family:Arial,sans-serif;
+
+    overflow:hidden;
+
 }
 
-.game-container{
-    text-align:center;
+.game{
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1rem;
+
+    width:100%;
+
 }
 
 h1{
-    color:#4b2e15;
-    margin-bottom:20px;
+
+    margin:0;
+
+    color:#4e2d13;
+
     letter-spacing:2px;
+
+    font-size:clamp(1.8rem,4vw,3rem);
+
 }
 
-#board{
+#status{
+
+    color:#4e2d13;
+
+    font-size:clamp(1rem,2vw,1.4rem);
+
+    font-weight:bold;
+
+    min-height:30px;
+
+}
+
+.board{
 
     position:relative;
 
-    width:600px;
-    height:600px;
+    width:var(--board-size);
+
+    aspect-ratio:1;
 
     border-radius:50%;
 
     background:
         radial-gradient(circle at 30% 30%,
-        #d8aa6d,
-        #8b5a2b 75%);
+        #d7a567,
+        #8a572b 70%);
 
     box-shadow:
-        inset 0 0 40px rgba(0,0,0,0.45),
-        0 15px 40px rgba(0,0,0,0.35);
-
-    transform:perspective(900px) rotateX(10deg);
+        inset 0 0 50px rgba(0,0,0,0.45),
+        0 20px 40px rgba(0,0,0,0.3);
 
 }
 
-/* hole */
+/* HOLE */
 
 .hole{
 
     position:absolute;
 
-    width:58px;
-    height:58px;
+    width:var(--cell-size);
+    height:var(--cell-size);
 
     border-radius:50%;
 
+    transform:translate(-50%,-50%);
+
     background:
         radial-gradient(circle at 30% 30%,
-        #4a2b14,
-        #1b0f07);
+        #4b2c14,
+        #1a0d06);
 
     box-shadow:
-        inset 0 5px 10px rgba(0,0,0,0.8),
-        0 2px 2px rgba(255,255,255,0.1);
+        inset 0 4px 10px rgba(0,0,0,0.9),
+        0 1px 2px rgba(255,255,255,0.1);
 
 }
 
-/* peg */
+/* PEG */
 
 .peg{
 
     position:absolute;
 
-    width:46px;
-    height:46px;
+    width:var(--peg-size);
+    height:var(--peg-size);
 
-    top:6px;
-    left:6px;
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
 
     border-radius:50%;
 
@@ -91,23 +143,29 @@ h1{
 
     background:
         radial-gradient(circle at 30% 30%,
-        #ff6666,
-        #a80000);
+        #ff6b6b,
+        #a30000);
 
     box-shadow:
-        inset -3px -3px 6px rgba(0,0,0,0.35),
-        inset 2px 2px 5px rgba(255,255,255,0.35),
+        inset -3px -3px 5px rgba(0,0,0,0.35),
+        inset 2px 2px 5px rgba(255,255,255,0.3),
         0 4px 10px rgba(0,0,0,0.4);
 
     transition:
         transform 0.2s,
-        background 0.2s;
+        box-shadow 0.2s;
 
 }
 
 .peg:hover{
-    transform:scale(1.12);
+
+    transform:
+        translate(-50%,-50%)
+        scale(1.1);
+
 }
+
+/* SELECTED */
 
 .selected{
 
@@ -116,11 +174,9 @@ h1{
         #ffe082,
         #ff9800);
 
-    transform:scale(1.12);
-
 }
 
-/* valid move highlight */
+/* VALID MOVE */
 
 .valid{
 
@@ -137,7 +193,7 @@ h1{
 
     50%{
         box-shadow:
-            0 0 20px yellow;
+            0 0 25px yellow;
     }
 
     100%{
@@ -147,43 +203,31 @@ h1{
 
 }
 
-.message{
-
-    margin-top:20px;
-    font-size:22px;
-    font-weight:bold;
-    color:#4b2e15;
-}
+/* BUTTON */
 
 button{
 
-    margin-top:20px;
-
-    padding:12px 24px;
-
     border:none;
+
+    padding:0.9rem 1.5rem;
+
     border-radius:12px;
 
-    background:#5d4037;
+    background:#4e342e;
+
     color:white;
 
-    font-size:16px;
+    font-size:1rem;
 
     cursor:pointer;
 
     transition:0.2s;
+
 }
 
 button:hover{
-    background:#3e2723;
-}
 
-@media(max-width:700px){
-
-    #board{
-        width:90vw;
-        height:90vw;
-    }
+    background:#2f1b16;
 
 }
 
@@ -192,28 +236,26 @@ button:hover{
 
 <body>
 
-<div class="game-container">
+<div class="game">
 
     <h1>Brainvita</h1>
 
-    <div id="board"></div>
+    <div id="status"></div>
 
-    <button onclick="resetGame()">Restart Game</button>
+    <div class="board" id="board"></div>
 
-    <div class="message" id="message"></div>
+    <button onclick="resetGame()">Restart</button>
 
 </div>
 
 <script>
 
 /* =========================
-   BOARD DATA
+   GAME CONFIG
 ========================= */
 
-const boardElement = document.getElementById("board");
-const messageElement = document.getElementById("message");
-
 const layout = [
+
     [-1,-1,1,1,1,-1,-1],
     [-1,-1,1,1,1,-1,-1],
     [ 1, 1,1,1,1, 1, 1],
@@ -221,31 +263,37 @@ const layout = [
     [ 1, 1,1,1,1, 1, 1],
     [-1,-1,1,1,1,-1,-1],
     [-1,-1,1,1,1,-1,-1]
+
 ];
 
 let board = structuredClone(layout);
 
 let selected = null;
 
+const boardElement = document.getElementById("board");
+
+const statusElement = document.getElementById("status");
+
 /* =========================
-   TRUE CIRCULAR POSITIONS
+   TRUE CIRCULAR POSITIONING
 ========================= */
 
-const positions = [];
+const coords = [];
 
-const spacing = 74;
-const offset = 78;
+const spacing = 13;
+
+const start = 11;
 
 for(let r=0;r<7;r++){
 
-    positions[r] = [];
+    coords[r] = [];
 
     for(let c=0;c<7;c++){
 
-        positions[r][c] = {
+        coords[r][c] = {
 
-            x: offset + c * spacing,
-            y: offset + r * spacing
+            x:start + c * spacing,
+            y:start + r * spacing
 
         };
 
@@ -253,7 +301,7 @@ for(let r=0;r<7;r++){
 }
 
 /* =========================
-   DRAW BOARD
+   DRAW
 ========================= */
 
 function drawBoard(){
@@ -266,71 +314,59 @@ function drawBoard(){
 
             if(board[r][c] === -1) continue;
 
-            const hole = createHole(r,c);
+            const hole = document.createElement("div");
+
+            hole.className = "hole";
+
+            hole.style.left = coords[r][c].x + "%";
+            hole.style.top  = coords[r][c].y + "%";
+
+            const validMoves =
+                selected
+                ? getPossibleMoves(selected.r,selected.c)
+                : [];
+
+            if(validMoves.some(m => m.r === r && m.c === c)){
+
+                hole.classList.add("valid");
+
+                hole.onclick = () => movePeg(r,c);
+
+            }
+
+            if(board[r][c] === 1){
+
+                const peg = document.createElement("div");
+
+                peg.className = "peg";
+
+                if(
+                    selected &&
+                    selected.r === r &&
+                    selected.c === c
+                ){
+                    peg.classList.add("selected");
+                }
+
+                peg.onclick = (e) => {
+
+                    e.stopPropagation();
+
+                    selectPeg(r,c);
+
+                };
+
+                hole.appendChild(peg);
+            }
 
             boardElement.appendChild(hole);
-
         }
     }
 
 }
 
 /* =========================
-   CREATE HOLE
-========================= */
-
-function createHole(r,c){
-
-    const hole = document.createElement("div");
-
-    hole.className = "hole";
-
-    hole.style.left = positions[r][c].x + "px";
-    hole.style.top  = positions[r][c].y + "px";
-
-    const validMoves =
-        selected
-        ? getPossibleMoves(selected.r, selected.c)
-        : [];
-
-    if(validMoves.some(m => m.r === r && m.c === c)){
-
-        hole.classList.add("valid");
-
-        hole.onclick = () => movePeg(r,c);
-
-    }
-
-    if(board[r][c] === 1){
-
-        const peg = document.createElement("div");
-
-        peg.className = "peg";
-
-        if(
-            selected &&
-            selected.r === r &&
-            selected.c === c
-        ){
-            peg.classList.add("selected");
-        }
-
-        peg.onclick = (e) => {
-
-            e.stopPropagation();
-
-            selectPeg(r,c);
-
-        };
-
-        hole.appendChild(peg);
-    }
-
-    return hole;
-}
-
-/* =========================
-   SELECT PEG
+   SELECT
 ========================= */
 
 function selectPeg(r,c){
@@ -350,10 +386,11 @@ function selectPeg(r,c){
     }
 
     drawBoard();
+
 }
 
 /* =========================
-   VALID MOVES
+   POSSIBLE MOVES
 ========================= */
 
 function getPossibleMoves(r,c){
@@ -361,9 +398,9 @@ function getPossibleMoves(r,c){
     const dirs = [
 
         [-2,0],
-        [ 2,0],
+        [2,0],
         [0,-2],
-        [0, 2]
+        [0,2]
 
     ];
 
@@ -395,10 +432,11 @@ function getPossibleMoves(r,c){
     }
 
     return moves;
+
 }
 
 /* =========================
-   MOVE PEG
+   MOVE
 ========================= */
 
 function movePeg(r,c){
@@ -416,13 +454,13 @@ function movePeg(r,c){
 
     board[sr][sc] = 0;
     board[mr][mc] = 0;
-    board[r][c]   = 1;
+    board[r][c] = 1;
 
     selected = null;
 
     drawBoard();
 
-    checkGameState();
+    checkGame();
 
 }
 
@@ -430,10 +468,11 @@ function movePeg(r,c){
    CHECK GAME STATE
 ========================= */
 
-function checkGameState(){
+function checkGame(){
 
     let pegs = 0;
-    let movesAvailable = false;
+
+    let movesLeft = false;
 
     for(let r=0;r<7;r++){
 
@@ -443,9 +482,9 @@ function checkGameState(){
 
                 pegs++;
 
-                if(getPossibleMoves(r,c).length > 0){
+                if(getPossibleMoves(r,c).length){
 
-                    movesAvailable = true;
+                    movesLeft = true;
 
                 }
 
@@ -453,27 +492,23 @@ function checkGameState(){
         }
     }
 
-    /* WIN */
-
     if(pegs === 1){
 
-        messageElement.innerHTML =
-            "🎉 Brilliant! You solved Brainvita!";
+        statusElement.innerHTML =
+            "🎉 You solved Brainvita!";
 
         return;
     }
 
-    /* LOSE */
+    if(!movesLeft){
 
-    if(!movesAvailable){
-
-        messageElement.innerHTML =
-            "❌ No more moves left!";
+        statusElement.innerHTML =
+            "❌ No more valid moves!";
 
         return;
     }
 
-    messageElement.innerHTML =
+    statusElement.innerHTML =
         `Pegs Remaining: ${pegs}`;
 
 }
@@ -488,11 +523,9 @@ function resetGame(){
 
     selected = null;
 
-    messageElement.innerHTML = "";
-
     drawBoard();
 
-    checkGameState();
+    checkGame();
 
 }
 
