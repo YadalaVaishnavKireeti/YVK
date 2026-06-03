@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brainvita Game</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 20px;
+    }
+
+    #board {
+        display: grid;
+        grid-template-columns: repeat(7, 60px);
+        grid-template-rows: repeat(7, 60px);
+        gap: 5px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .cell {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        background: #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .invalid {
+        background: transparent;
+    }
+
+    .peg {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #0077ff;
+        cursor: pointer;
+    }
+
+    .selected {
+        background: orange !important;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Brainvita Game</h1>
+
+<div id="board"></div>
+
+<button onclick="resetGame()">Restart</button>
+
+<script>
+const boardElement = document.getElementById("board");
+
+let selected = null;
+
+const initialBoard = [
+    [-1,-1, 1, 1, 1,-1,-1],
+    [-1,-1, 1, 1, 1,-1,-1],
+    [ 1, 1, 1, 1, 1, 1, 1],
+    [ 1, 1, 1, 0, 1, 1, 1],
+    [ 1, 1, 1, 1, 1, 1, 1],
+    [-1,-1, 1, 1, 1,-1,-1],
+    [-1,-1, 1, 1, 1,-1,-1]
+];
+
+let board = JSON.parse(JSON.stringify(initialBoard));
+
+function drawBoard() {
+    boardElement.innerHTML = "";
+
+    for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+
+            if (board[r][c] === -1) {
+                cell.classList.add("invalid");
+            }
+
+            if (board[r][c] === 1) {
+                const peg = document.createElement("div");
+                peg.classList.add("peg");
+
+                if (selected && selected.r === r && selected.c === c) {
+                    peg.classList.add("selected");
+                }
+
+                peg.onclick = () => selectPeg(r, c);
+
+                cell.appendChild(peg);
+            }
+
+            if (board[r][c] === 0) {
+                cell.onclick = () => movePeg(r, c);
+            }
+
+            boardElement.appendChild(cell);
+        }
+    }
+}
+
+function selectPeg(r, c) {
+    selected = { r, c };
+    drawBoard();
+}
+
+function movePeg(r, c) {
+    if (!selected) return;
+
+    const sr = selected.r;
+    const sc = selected.c;
+
+    const dr = r - sr;
+    const dc = c - sc;
+
+    // valid move = jump 2 spaces
+    if (
+        (Math.abs(dr) === 2 && dc === 0) ||
+        (Math.abs(dc) === 2 && dr === 0)
+    ) {
+
+        const mr = sr + dr / 2;
+        const mc = sc + dc / 2;
+
+        // middle must contain peg
+        if (board[mr][mc] === 1 && board[r][c] === 0) {
+
+            board[sr][sc] = 0;
+            board[mr][mc] = 0;
+            board[r][c] = 1;
+
+            selected = null;
+
+            drawBoard();
+
+            checkWin();
+        }
+    }
+}
+
+function checkWin() {
+    let pegs = 0;
+
+    for (let row of board) {
+        for (let cell of row) {
+            if (cell === 1) pegs++;
+        }
+    }
+
+    if (pegs === 1) {
+        setTimeout(() => {
+            alert("You Win!");
+        }, 100);
+    }
+}
+
+function resetGame() {
+    board = JSON.parse(JSON.stringify(initialBoard));
+    selected = null;
+    drawBoard();
+}
+
+drawBoard();
+</script>
+
+</body>
+</html>
