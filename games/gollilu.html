@@ -1,192 +1,409 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brainvita Circular Board</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Brainvita</title>
 
 <style>
-    body {
-        margin: 0;
-        background: #d9c29c;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: Arial, sans-serif;
-    }
 
-    .game-container {
-        text-align: center;
-    }
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:
+        radial-gradient(circle at top,#f4e4c1,#b78652);
+    font-family:Arial,Helvetica,sans-serif;
+}
 
-    h1 {
-        color: #4b2e15;
-        margin-bottom: 20px;
-    }
+.game-container{
+    text-align:center;
+}
 
-    /* Circular wooden board */
-    #board {
-        width: 520px;
-        height: 520px;
-        border-radius: 50%;
-        background: radial-gradient(circle, #c89b5d, #8b5a2b);
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        grid-template-rows: repeat(7, 1fr);
-        gap: 8px;
-        padding: 35px;
-        box-sizing: border-box;
+h1{
+    color:#4b2e15;
+    margin-bottom:20px;
+    letter-spacing:2px;
+}
+
+#board{
+
+    position:relative;
+
+    width:600px;
+    height:600px;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(circle at 30% 30%,
+        #d8aa6d,
+        #8b5a2b 75%);
+
+    box-shadow:
+        inset 0 0 40px rgba(0,0,0,0.45),
+        0 15px 40px rgba(0,0,0,0.35);
+
+    transform:perspective(900px) rotateX(10deg);
+
+}
+
+/* hole */
+
+.hole{
+
+    position:absolute;
+
+    width:58px;
+    height:58px;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(circle at 30% 30%,
+        #4a2b14,
+        #1b0f07);
+
+    box-shadow:
+        inset 0 5px 10px rgba(0,0,0,0.8),
+        0 2px 2px rgba(255,255,255,0.1);
+
+}
+
+/* peg */
+
+.peg{
+
+    position:absolute;
+
+    width:46px;
+    height:46px;
+
+    top:6px;
+    left:6px;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    background:
+        radial-gradient(circle at 30% 30%,
+        #ff6666,
+        #a80000);
+
+    box-shadow:
+        inset -3px -3px 6px rgba(0,0,0,0.35),
+        inset 2px 2px 5px rgba(255,255,255,0.35),
+        0 4px 10px rgba(0,0,0,0.4);
+
+    transition:
+        transform 0.2s,
+        background 0.2s;
+
+}
+
+.peg:hover{
+    transform:scale(1.12);
+}
+
+.selected{
+
+    background:
+        radial-gradient(circle at 30% 30%,
+        #ffe082,
+        #ff9800);
+
+    transform:scale(1.12);
+
+}
+
+/* valid move highlight */
+
+.valid{
+
+    animation:pulse 1s infinite;
+
+}
+
+@keyframes pulse{
+
+    0%{
         box-shadow:
-            inset 0 0 25px rgba(0,0,0,0.4),
-            0 10px 30px rgba(0,0,0,0.3);
+            0 0 0px yellow;
     }
 
-    .cell {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    /* Hidden corner cells */
-    .invalid {
-        visibility: hidden;
-    }
-
-    /* Board holes */
-    .hole {
-        width: 52px;
-        height: 52px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 30% 30%, #4a2c12, #1e1005);
+    50%{
         box-shadow:
-            inset 0 4px 8px rgba(0,0,0,0.6),
-            0 1px 2px rgba(255,255,255,0.2);
-        position: relative;
+            0 0 20px yellow;
     }
 
-    /* Pegs */
-    .peg {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        background: radial-gradient(circle at 30% 30%, #ff5252, #b30000);
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        cursor: pointer;
-        transition: transform 0.15s;
+    100%{
         box-shadow:
-            inset -3px -3px 5px rgba(0,0,0,0.3),
-            inset 2px 2px 4px rgba(255,255,255,0.4),
-            0 3px 6px rgba(0,0,0,0.4);
+            0 0 0px yellow;
     }
 
-    .peg:hover {
-        transform: scale(1.1);
+}
+
+.message{
+
+    margin-top:20px;
+    font-size:22px;
+    font-weight:bold;
+    color:#4b2e15;
+}
+
+button{
+
+    margin-top:20px;
+
+    padding:12px 24px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#5d4037;
+    color:white;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+button:hover{
+    background:#3e2723;
+}
+
+@media(max-width:700px){
+
+    #board{
+        width:90vw;
+        height:90vw;
     }
 
-    .selected {
-        background: radial-gradient(circle at 30% 30%, #ffd54f, #ff9800);
-    }
+}
 
-    button {
-        margin-top: 20px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 10px;
-        background: #5d4037;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background: #3e2723;
-    }
 </style>
 </head>
 
 <body>
 
 <div class="game-container">
+
     <h1>Brainvita</h1>
 
     <div id="board"></div>
 
     <button onclick="resetGame()">Restart Game</button>
+
+    <div class="message" id="message"></div>
+
 </div>
 
 <script>
+
+/* =========================
+   BOARD DATA
+========================= */
+
 const boardElement = document.getElementById("board");
+const messageElement = document.getElementById("message");
+
+const layout = [
+    [-1,-1,1,1,1,-1,-1],
+    [-1,-1,1,1,1,-1,-1],
+    [ 1, 1,1,1,1, 1, 1],
+    [ 1, 1,1,0,1, 1, 1],
+    [ 1, 1,1,1,1, 1, 1],
+    [-1,-1,1,1,1,-1,-1],
+    [-1,-1,1,1,1,-1,-1]
+];
+
+let board = structuredClone(layout);
 
 let selected = null;
 
-const initialBoard = [
-    [-1,-1, 1, 1, 1,-1,-1],
-    [-1,-1, 1, 1, 1,-1,-1],
-    [ 1, 1, 1, 1, 1, 1, 1],
-    [ 1, 1, 1, 0, 1, 1, 1],
-    [ 1, 1, 1, 1, 1, 1, 1],
-    [-1,-1, 1, 1, 1,-1,-1],
-    [-1,-1, 1, 1, 1,-1,-1]
-];
+/* =========================
+   TRUE CIRCULAR POSITIONS
+========================= */
 
-let board = JSON.parse(JSON.stringify(initialBoard));
+const positions = [];
 
-function drawBoard() {
-    boardElement.innerHTML = "";
+const spacing = 74;
+const offset = 78;
 
-    for (let r = 0; r < 7; r++) {
-        for (let c = 0; c < 7; c++) {
+for(let r=0;r<7;r++){
 
-            const cell = document.createElement("div");
-            cell.classList.add("cell");
+    positions[r] = [];
 
-            if (board[r][c] === -1) {
-                cell.classList.add("invalid");
-            } else {
+    for(let c=0;c<7;c++){
 
-                const hole = document.createElement("div");
-                hole.classList.add("hole");
+        positions[r][c] = {
 
-                if (board[r][c] === 1) {
+            x: offset + c * spacing,
+            y: offset + r * spacing
 
-                    const peg = document.createElement("div");
-                    peg.classList.add("peg");
+        };
 
-                    if (
-                        selected &&
-                        selected.r === r &&
-                        selected.c === c
-                    ) {
-                        peg.classList.add("selected");
-                    }
-
-                    peg.onclick = () => selectPeg(r, c);
-
-                    hole.appendChild(peg);
-
-                } else {
-                    hole.onclick = () => movePeg(r, c);
-                }
-
-                cell.appendChild(hole);
-            }
-
-            boardElement.appendChild(cell);
-        }
     }
 }
 
-function selectPeg(r, c) {
-    selected = { r, c };
+/* =========================
+   DRAW BOARD
+========================= */
+
+function drawBoard(){
+
+    boardElement.innerHTML = "";
+
+    for(let r=0;r<7;r++){
+
+        for(let c=0;c<7;c++){
+
+            if(board[r][c] === -1) continue;
+
+            const hole = createHole(r,c);
+
+            boardElement.appendChild(hole);
+
+        }
+    }
+
+}
+
+/* =========================
+   CREATE HOLE
+========================= */
+
+function createHole(r,c){
+
+    const hole = document.createElement("div");
+
+    hole.className = "hole";
+
+    hole.style.left = positions[r][c].x + "px";
+    hole.style.top  = positions[r][c].y + "px";
+
+    const validMoves =
+        selected
+        ? getPossibleMoves(selected.r, selected.c)
+        : [];
+
+    if(validMoves.some(m => m.r === r && m.c === c)){
+
+        hole.classList.add("valid");
+
+        hole.onclick = () => movePeg(r,c);
+
+    }
+
+    if(board[r][c] === 1){
+
+        const peg = document.createElement("div");
+
+        peg.className = "peg";
+
+        if(
+            selected &&
+            selected.r === r &&
+            selected.c === c
+        ){
+            peg.classList.add("selected");
+        }
+
+        peg.onclick = (e) => {
+
+            e.stopPropagation();
+
+            selectPeg(r,c);
+
+        };
+
+        hole.appendChild(peg);
+    }
+
+    return hole;
+}
+
+/* =========================
+   SELECT PEG
+========================= */
+
+function selectPeg(r,c){
+
+    if(
+        selected &&
+        selected.r === r &&
+        selected.c === c
+    ){
+
+        selected = null;
+
+    }else{
+
+        selected = {r,c};
+
+    }
+
     drawBoard();
 }
 
-function movePeg(r, c) {
+/* =========================
+   VALID MOVES
+========================= */
 
-    if (!selected) return;
+function getPossibleMoves(r,c){
+
+    const dirs = [
+
+        [-2,0],
+        [ 2,0],
+        [0,-2],
+        [0, 2]
+
+    ];
+
+    const moves = [];
+
+    for(const [dr,dc] of dirs){
+
+        const nr = r + dr;
+        const nc = c + dc;
+
+        const mr = r + dr/2;
+        const mc = c + dc/2;
+
+        if(
+
+            nr >= 0 &&
+            nr < 7 &&
+            nc >= 0 &&
+            nc < 7 &&
+
+            board[nr][nc] === 0 &&
+            board[mr][mc] === 1
+
+        ){
+
+            moves.push({r:nr,c:nc});
+
+        }
+    }
+
+    return moves;
+}
+
+/* =========================
+   MOVE PEG
+========================= */
+
+function movePeg(r,c){
+
+    if(!selected) return;
 
     const sr = selected.r;
     const sc = selected.c;
@@ -194,53 +411,97 @@ function movePeg(r, c) {
     const dr = r - sr;
     const dc = c - sc;
 
-    const validMove =
-        (Math.abs(dr) === 2 && dc === 0) ||
-        (Math.abs(dc) === 2 && dr === 0);
+    const mr = sr + dr/2;
+    const mc = sc + dc/2;
 
-    if (!validMove) return;
+    board[sr][sc] = 0;
+    board[mr][mc] = 0;
+    board[r][c]   = 1;
 
-    const mr = sr + dr / 2;
-    const mc = sc + dc / 2;
+    selected = null;
 
-    if (board[mr][mc] === 1 && board[r][c] === 0) {
+    drawBoard();
 
-        board[sr][sc] = 0;
-        board[mr][mc] = 0;
-        board[r][c] = 1;
+    checkGameState();
 
-        selected = null;
-
-        drawBoard();
-
-        checkWin();
-    }
 }
 
-function checkWin() {
+/* =========================
+   CHECK GAME STATE
+========================= */
+
+function checkGameState(){
 
     let pegs = 0;
+    let movesAvailable = false;
 
-    for (let row of board) {
-        for (let cell of row) {
-            if (cell === 1) pegs++;
+    for(let r=0;r<7;r++){
+
+        for(let c=0;c<7;c++){
+
+            if(board[r][c] === 1){
+
+                pegs++;
+
+                if(getPossibleMoves(r,c).length > 0){
+
+                    movesAvailable = true;
+
+                }
+
+            }
         }
     }
 
-    if (pegs === 1) {
-        setTimeout(() => {
-            alert("You Win!");
-        }, 100);
+    /* WIN */
+
+    if(pegs === 1){
+
+        messageElement.innerHTML =
+            "🎉 Brilliant! You solved Brainvita!";
+
+        return;
     }
+
+    /* LOSE */
+
+    if(!movesAvailable){
+
+        messageElement.innerHTML =
+            "❌ No more moves left!";
+
+        return;
+    }
+
+    messageElement.innerHTML =
+        `Pegs Remaining: ${pegs}`;
+
 }
 
-function resetGame() {
-    board = JSON.parse(JSON.stringify(initialBoard));
+/* =========================
+   RESET
+========================= */
+
+function resetGame(){
+
+    board = structuredClone(layout);
+
     selected = null;
+
+    messageElement.innerHTML = "";
+
     drawBoard();
+
+    checkGameState();
+
 }
 
-drawBoard();
+/* =========================
+   START
+========================= */
+
+resetGame();
+
 </script>
 
 </body>
