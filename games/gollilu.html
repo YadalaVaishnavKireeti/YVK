@@ -51,9 +51,7 @@ body{
 
 }
 
-/* =========================
-   GAME WRAPPER
-========================= */
+/* GAME WRAPPER */
 
 .game{
 
@@ -81,9 +79,7 @@ body{
 
 }
 
-/* =========================
-   INFO BAR
-========================= */
+/* INFO BAR */
 
 .topbar{
 
@@ -102,9 +98,7 @@ body{
 
 }
 
-/* =========================
-   BOARD
-========================= */
+/* BOARD */
 
 .board{
 
@@ -200,9 +194,7 @@ body{
 
 }
 
-/* =========================
-   HOLES
-========================= */
+/* HOLES */
 
 .hole{
 
@@ -233,9 +225,7 @@ body{
 
 }
 
-/* =========================
-   MARBLES
-========================= */
+/* MARBLES */
 
 .marble{
 
@@ -372,9 +362,7 @@ body{
         #5c2600 100%);
 
 }
-/* =========================
-   VALID MOVES
-========================= */
+/* VALID MOVES */
 
 .valid{
 
@@ -409,9 +397,7 @@ body{
 
 }
 
-/* =========================
-   STATUS
-========================= */
+/* STATUS */
 
 .status{
 
@@ -425,9 +411,7 @@ body{
 
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* BUTTONS */
 
 .controls{
 
@@ -467,9 +451,7 @@ button:hover{
 
 }
 
-/* =========================
-   MOBILE
-========================= */
+/* MOBILE */
 
 @media(max-width:600px){
 
@@ -539,9 +521,7 @@ button:hover{
 
 <script>
 
-/* =========================
-   BOARD
-========================= */
+/* BOARD */
 
 const layout = [
 
@@ -567,9 +547,7 @@ let history = [];
 const isMobile =
 window.matchMedia("(pointer: coarse)").matches;
 
-/* =========================
-   ELEMENTS
-========================= */
+/* ELEMENTS */
 
 const boardEl =
 document.getElementById("board");
@@ -583,9 +561,7 @@ document.getElementById("timer");
 const statusEl =
 document.getElementById("status");
 
-/* =========================
-   TIMER
-========================= */
+/* TIMER */
 
 let seconds = 0;
 
@@ -624,9 +600,7 @@ function stopTimer(){
 
 }
 
-/* =========================
-   SOUNDS
-========================= */
+/* SOUNDS */
 
 const moveSound =
 new Audio(
@@ -642,9 +616,7 @@ const loseSound =
 new Audio(
 "https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"
 );
-/* =========================
-   COORDS
-========================= */
+/* COORDS */
 
 const coords = [];
 
@@ -668,9 +640,7 @@ for(let r=0;r<7;r++){
     }
 }
 
-/* =========================
-   DRAW
-========================= */
+/* DRAW */
 
 function drawBoard(){
 
@@ -781,9 +751,7 @@ function drawBoard(){
 
 }
 
-/* =========================
-   SELECT
-========================= */
+/* SELECT */
 
 function selectPeg(r,c){
 
@@ -805,9 +773,7 @@ function selectPeg(r,c){
 
 }
 
-/* =========================
-   MOVES
-========================= */
+/* MOVES */
 
 function getMoves(r,c){
 
@@ -851,9 +817,7 @@ function getMoves(r,c){
 
 }
 
-/* =========================
-   MOVE
-========================= */
+/* MOVE */
 
 function movePeg(r,c){
 
@@ -903,9 +867,7 @@ function movePeg(r,c){
 
 }
 
-/* =========================
-   CHECK
-========================= */
+/* CHECK */
 
 function checkGame(){
 
@@ -973,9 +935,7 @@ function checkGame(){
 
 }
 
-/* =========================
-   UNDO
-========================= */
+/* UNDO */
 
 function undoMove(){
 
@@ -997,9 +957,7 @@ function undoMove(){
 
 }
 
-/* =========================
-   RESET
-========================= */
+/* RESET */
 
 function resetGame(){
 
@@ -1028,9 +986,7 @@ document.querySelector(
 
 }
 
-/* =========================
-   DRAG
-========================= */
+/* DRAG */
 
 function enableDrag(
 marble,r,c){
@@ -1098,9 +1054,7 @@ boardEl.addEventListener(
 
 });
 
-/* =========================
-   START
-========================= */
+/* START */
 
 resetGame();
 
