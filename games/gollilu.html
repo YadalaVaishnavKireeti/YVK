@@ -346,12 +346,15 @@ body{
 
 }
 
+@media(hover:hover){
+
 .marble:hover{
 
     transform:
-
         translate(-50%,-50%)
         scale(1.12);
+
+}
 
 }
 
@@ -377,6 +380,8 @@ body{
 
     animation:pulse 1s infinite;
 
+    cursor:pointer;
+
 }
 
 @keyframes pulse{
@@ -384,21 +389,21 @@ body{
     0%{
 
         box-shadow:
-        0 0 0px gold;
+        0 0 0px rgba(255,215,0,0.1);
 
     }
 
     50%{
 
         box-shadow:
-        0 0 18px gold;
+        0 0 24px rgba(255,215,0,0.95);
 
     }
 
     100%{
 
         box-shadow:
-        0 0 0px gold;
+        0 0 0px rgba(255,215,0,0.1);
 
     }
 
@@ -515,7 +520,7 @@ button:hover{
     <div class="board"
     id="board"></div>
 
-    <div class="controls">
+    <div class="controls" id=""controls">
 
         <button onclick="undoMove()">
             Undo
@@ -558,6 +563,9 @@ let selected = null;
 let moves = 0;
 
 let history = [];
+
+const isMobile =
+window.matchMedia("(pointer: coarse)").matches;
 
 /* =========================
    ELEMENTS
@@ -630,6 +638,10 @@ new Audio(
 "https://actions.google.com/sounds/v1/cartoon/concussive_hit_guitar_boing.ogg"
 );
 
+const loseSound =
+new Audio(
+"https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"
+);
 /* =========================
    COORDS
 ========================= */
@@ -723,17 +735,35 @@ function drawBoard(){
 
                 marble.onclick = e=>{
 
-                    e.stopPropagation();
+                e.stopPropagation();
 
-                    selectPeg(r,c);
+                if(
+                    selected &&
+                    selected.r===r &&
+                    selected.c===c
+                ){
 
-                };
+                    selected = null;
 
-                marble.draggable=true;
+                }else{
 
-                enableDrag(
-                    marble,r,c
-                );
+                    selected = {r,c};
+
+                }
+
+                drawBoard();
+
+            };
+
+                if(!isMobile){
+
+    marble.draggable = true;
+
+    enableDrag(
+        marble,r,c
+    );
+
+}
 
                 hole.appendChild(
                     marble
@@ -913,16 +943,26 @@ function checkGame(){
 
     winSound.play();
 
+    document.querySelector(
+    'button[onclick="undoMove()"]'
+    ).style.display = "none";
+
     return;
 
 }
 
-    if(!possible){
+   if(!possible){
 
     stopTimer();
 
     statusEl.innerHTML =
     "❌ No Moves Left";
+
+    loseSound.play();
+
+    document.querySelector(
+    'button[onclick="undoMove()"]'
+    ).style.display = "none";
 
     return;
 
@@ -979,6 +1019,9 @@ timerStarted = false;
 
 timerEl.innerHTML = "00:00";
 
+document.querySelector(
+'button[onclick="undoMove()"]'
+).style.display = "inline-block";
     drawBoard();
 
     checkGame();
